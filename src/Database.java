@@ -42,7 +42,6 @@ public class Database {
                 statement.execute(sqlStatement2);
             }
 
-
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
         }

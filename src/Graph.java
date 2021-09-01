@@ -1,9 +1,4 @@
-import org.apache.commons.math3.geometry.spherical.twod.Vertex;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Graph {
 
@@ -54,6 +49,41 @@ public class Graph {
 
     List<Person> getRelatedPersons(String name) {
         return relatedPersons.get(new Person(name));
+    }
+
+    // explores family tree as deep as possible along each Person's branch before exploring family tree line at the same level
+    Set<String> depthFirstTraversal(Graph graph, String root) {
+        Set<String> visited = new LinkedHashSet<String>();
+        Stack<String> stack = new Stack<String>();
+        stack.push(root);
+        while (!stack.isEmpty()) {
+            String person = stack.pop();
+            if (!visited.contains(person)) {
+                visited.add(person);
+                for (Person eachPerson : graph.getRelatedPersons(person)) {
+                    stack.push(eachPerson.getName());
+                }
+            }
+        }
+        return visited;
+    }
+
+    // finds all persons in the family tree at the same level before going deeper in the family tree graph
+    Set<String> breadthFirstTraversal(Graph graph, String root) {
+        Set<String> visited = new LinkedHashSet<String>();
+        Queue<String> queue = new LinkedList<String>();
+        queue.add(root);
+        visited.add(root);
+        while (!queue.isEmpty()) {
+            String person = queue.poll();
+            for (Person eachPerson : graph.getRelatedPersons(person)) {
+                if (!visited.contains(eachPerson.getName())) {
+                    visited.add(eachPerson.getName());
+                    queue.add(eachPerson.getName());
+                }
+            }
+        }
+        return visited;
     }
 
 }
