@@ -1,6 +1,6 @@
 import org.jgrapht.graph.DefaultEdge;
 
-class RelationshipEdges extends DefaultEdge {
+class RelationshipEdge extends DefaultEdge {
 
     private final String label;
 
@@ -11,8 +11,12 @@ class RelationshipEdges extends DefaultEdge {
     private static final String sibling = "is sibling of";
     private static final String cousin = "is cousin of";
     private static final String grandchild = "is grandchild of";
+    private static final String aunt = "is aunt of";
+    private static final String uncle = "is uncle of";
+    private static final String niece = "is niece of";
+    private static final String nephew = "is nephew of";
 
-    public RelationshipEdges(String label) {
+    public RelationshipEdge(String label) {
         this.label = label;
     }
 
