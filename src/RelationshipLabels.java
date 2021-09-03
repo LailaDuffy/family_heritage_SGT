@@ -1,0 +1,19 @@
+public enum RelationshipLabels {
+    mother,
+    father,
+    grandmother,
+    grandfather,
+    uncle,
+    aunt,
+    husband,
+    wife,
+    son,
+    daughter,
+    sister,
+    brother,
+    grandson,
+    granddaughter,
+    cousin,
+    niece,
+    nephew
+}

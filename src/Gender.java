@@ -1,4 +1,5 @@
-//public enum Gender {
-//    male,
-//    female
-//}
+public enum Gender {
+    male,
+    female,
+    other
+}

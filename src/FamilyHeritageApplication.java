@@ -56,12 +56,16 @@ public class FamilyHeritageApplication {
                     System.out.print("Type in a name of person: ");
                     Scanner scan = new Scanner(System.in);
                     String inputChoice = scan.nextLine();
+                    int counter = 0;
                     for (Person eachPerson : familyTree.vertexSet()) {
                         if (eachPerson.getName().equalsIgnoreCase(inputChoice)) {
                             System.out.println("Here is the information about people called " + inputChoice + ": ");
                             System.out.println(eachPerson.toString());
-                        } // need to add a statement in case of the name is not in the family tree
-                    }
+                            counter++;
+                        }
+                    } if (counter == 0) {
+                    System.out.println("A person with this name does not exist in the family tree");
+                }
                     System.out.println();
                     break;
 
@@ -81,47 +85,51 @@ public class FamilyHeritageApplication {
 
     static Graph testGraph() {
 
-        Person person1 = new Person("Olivia", "Williams");
-        Person person2 = new Person("Jack", "Williams");
-        Person person3 = new Person("Thomas", "Williams");
-        Person person4 = new Person("Sophia", "Williams");
+        PersonGraph graph = new PersonGraph(RelationshipEdge.class);
+        graph.addPerson("Olivia", "Williams");
+        graph.addPerson("Jack", "Williams");
+        graph.addPerson("Thomas", "Williams");
+        graph.addPerson("Sophia", "Williams");
 
-        Graph<Person, RelationshipEdge> graph = new DefaultDirectedGraph<Person, RelationshipEdge>(RelationshipEdge.class);
-        graph.addVertex(person1);
-        graph.addVertex(person2);
-        graph.addVertex(person3);
-        graph.addVertex(person4);
-        graph.addEdge(person1, person2, new RelationshipEdge(RelationshipEdge.spouse));
-        graph.addEdge(person2, person1, new RelationshipEdge(RelationshipEdge.spouse));
-        graph.addEdge(person1, person3, new RelationshipEdge(RelationshipEdge.parent));
-        graph.addEdge(person3, person1, new RelationshipEdge(RelationshipEdge.child));
-        graph.addEdge(person2, person3, new RelationshipEdge(RelationshipEdge.parent));
-        graph.addEdge(person3, person2, new RelationshipEdge(RelationshipEdge.child));
-        graph.addEdge(person1, person4, new RelationshipEdge(RelationshipEdge.parent));
-        graph.addEdge(person4, person1, new RelationshipEdge(RelationshipEdge.child));
-        graph.addEdge(person2, person3, new RelationshipEdge(RelationshipEdge.parent));
-        graph.addEdge(person3, person2, new RelationshipEdge(RelationshipEdge.child));
+        graph.addRelationshipEdge("Olivia", "Williams", "Jack", "Williams", new RelationshipEdge(EdgeNames.wife));
+        graph.addRelationshipEdge("Jack", "Williams", "Olivia", "Williams", new RelationshipEdge(EdgeNames.husband));
+        graph.addRelationshipEdge("Olivia", "Williams", "Thomas", "Williams", new RelationshipEdge(EdgeNames.mother));
+        graph.addRelationshipEdge("Thomas", "Williams", "Olivia", "Williams", new RelationshipEdge(EdgeNames.son));
+        graph.addRelationshipEdge("Jack", "Williams", "Thomas", "Williams", new RelationshipEdge(EdgeNames.father));
+        graph.addRelationshipEdge("Thomas", "Williams", "Jack", "Williams", new RelationshipEdge(EdgeNames.son));
+        graph.addRelationshipEdge("Olivia", "Williams", "Sophia", "Williams", new RelationshipEdge(EdgeNames.mother));
+        graph.addRelationshipEdge("Sophia", "Williams", "Olivia", "Williams", new RelationshipEdge(EdgeNames.daughter));
+        graph.addRelationshipEdge("Sophia", "Williams", "Jack", "Williams", new RelationshipEdge(EdgeNames.daughter));
+        graph.addRelationshipEdge("Jack", "Williams", "Sophia", "Williams", new RelationshipEdge(EdgeNames.father));
+        graph.addRelationshipEdge("Sophia", "Williams", "Thomas", "Williams", new RelationshipEdge(EdgeNames.sister));
+        graph.addRelationshipEdge("Thomas", "Williams", "Sophia", "Williams", new RelationshipEdge(EdgeNames.brother));
 
         return graph;
     }
 
-    static class RelationshipEdge extends DefaultEdge {
+    static class EdgeNames extends DefaultEdge {
 
         private final String label;
 
-        private static final String parent = "is parent of";
-        private static final String grandparent = "is grandparent of";
-        private static final String spouse = "is spouse of";
-        private static final String child = "is child of";
-        private static final String sibling = "is sibling of";
-        private static final String cousin = "is cousin of";
-        private static final String grandchild = "is grandchild of";
-        private static final String aunt = "is aunt of";
-        private static final String uncle = "is uncle of";
-        private static final String niece = "is niece of";
-        private static final String nephew = "is nephew of";
+        private static final RelationshipLabels mother = RelationshipLabels.mother;
+        private static final RelationshipLabels father = RelationshipLabels.father;
+        private static final RelationshipLabels grandmother = RelationshipLabels.grandmother;
+        private static final RelationshipLabels grandfather = RelationshipLabels.grandfather;
+        private static final RelationshipLabels husband = RelationshipLabels.husband;
+        private static final RelationshipLabels wife = RelationshipLabels.wife;
+        private static final RelationshipLabels son = RelationshipLabels.son;
+        private static final RelationshipLabels daughter = RelationshipLabels.daughter;
+        private static final RelationshipLabels sister = RelationshipLabels.sister;
+        private static final RelationshipLabels brother = RelationshipLabels.brother;
+        private static final RelationshipLabels grandson = RelationshipLabels.grandson;
+        private static final RelationshipLabels granddaughter = RelationshipLabels.granddaughter;
+        private static final RelationshipLabels cousin = RelationshipLabels.cousin;
+        private static final RelationshipLabels uncle = RelationshipLabels.uncle;
+        private static final RelationshipLabels aunt = RelationshipLabels.aunt;
+        private static final RelationshipLabels nephew = RelationshipLabels.nephew;
+        private static final RelationshipLabels niece = RelationshipLabels.niece;
 
-        public RelationshipEdge(String label) {
+        public EdgeNames(String label) {
             this.label = label;
         }
 

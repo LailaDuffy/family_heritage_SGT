@@ -6,17 +6,18 @@ import org.jgrapht.alg.shortestpath.*;
 import org.jgrapht.graph.*;
 
 import java.util.*;
+import java.util.function.Supplier;
 
-public class Graph extends DefaultDirectedGraph<Person, RelationshipEdge> {
+public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> {
 
     public Map<Person, List<Person>> relatedPersons = new HashMap<>();
 
-    public Graph(Class<? extends RelationshipEdge> edgeClass, Map<Person, List<Person>> relatedPersons) {
+    public PersonGraph(Class<? extends RelationshipEdge> edgeClass, Map<Person, List<Person>> relatedPersons) {
         super(edgeClass);
         this.relatedPersons = relatedPersons;
     }
 
-    public Graph(Class<? extends RelationshipEdge> edgeClass) {
+    public PersonGraph(Class<? extends RelationshipEdge> edgeClass) {
         super(edgeClass);
     }
 
@@ -28,8 +29,9 @@ public class Graph extends DefaultDirectedGraph<Person, RelationshipEdge> {
         this.relatedPersons = relatedPersons;
     }
 
-    void addPerson(String name, String surname) {
-        relatedPersons.putIfAbsent(new Person(name, surname), new ArrayList<>());
+    public void addPerson(String name, String surname) {
+        //relatedPersons.putIfAbsent(new Person(name, surname), new ArrayList<>());
+        this.addVertex(new Person(name, surname));
     }
 
     void removePerson(String name, String surname) {
@@ -39,7 +41,7 @@ public class Graph extends DefaultDirectedGraph<Person, RelationshipEdge> {
     }
 
 
-    void addRelationshipEdge(String name1, String surname1, String name2, String surname2, RelationshipEdge label1, RelationshipEdge label2) { //does this really add an edge? how?
+    void addRelationshipEdge(String name1, String surname1, String name2, String surname2, RelationshipEdge label1) { //does this really add an edge? how?
         Person person1 = new Person(name1, surname1);
         Person person2 = new Person(name2, surname2);
         relatedPersons.get(person1).add(person2);
@@ -62,7 +64,7 @@ public class Graph extends DefaultDirectedGraph<Person, RelationshipEdge> {
     }
 
     // explores family tree as deep as possible along each Person's branch before exploring family tree line at the same level
-    Set<Person> depthFirstTraversal(Graph graph, Person root) {
+    Set<Person> depthFirstTraversal(PersonGraph graph, Person root) {
         Set<Person> visited = new LinkedHashSet<Person>();
         Stack<Person> stack = new Stack<Person>();
         stack.push(root);
@@ -79,7 +81,7 @@ public class Graph extends DefaultDirectedGraph<Person, RelationshipEdge> {
     }
 
     // finds all persons in the family tree at the same level before going deeper in the family tree graph
-    Set<Person> breadthFirstTraversal(Graph graph, Person root) {
+    Set<Person> breadthFirstTraversal(PersonGraph graph, Person root) {
         Set<Person> visited = new LinkedHashSet<Person>();
         Queue<Person> queue = new LinkedList<Person>();
         queue.add(root);

@@ -1,16 +1,14 @@
 import org.jgrapht.graph.DefaultEdge;
 
-import java.util.List;
+public class RelationshipEdge extends DefaultEdge {
 
-class RelationshipEdge extends DefaultEdge {
+    private final RelationshipLabels label;
 
-    private final String label;
-
-    public RelationshipEdge(String label) {
+    public RelationshipEdge(RelationshipLabels label) {
         this.label = label;
     }
 
-    public String getLabel() {
+    public RelationshipLabels getLabel() {
         return label;
     }
 
