@@ -10,7 +10,7 @@ public class Database {
             Connection connection = DriverManager.getConnection(databasePath);
 
             if (connection != null) {
-                DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+                DatabaseMetaData metaData = (DatabaseMetaData)connection.getMetaData();
                 System.out.println("Connected to database");
 
                 Statement statement = connection.createStatement();
@@ -20,12 +20,9 @@ public class Database {
                                 "name TEXT NOT NULL," +
                                 "surname TEXT NOT NULL," +
                                 "gender TEXT NOT NULL," +
-                                "birth_date DATE," +
-                                "death_date DATE," +
-                                "place_of_birth TEXT NOT NULL)";
-//                                "description TEXT NOT NULL," +
-//                                "profession_id TEXT NOT NULL," +
-//                                "FOREIGN KEY (profession_ID) REFERENCES professions(id))";
+                                "birth_date TEXT NOT NULL," +
+                                "death_date TEXT)";
+
                 statement.execute(sqlStatement1);
 
                 String sqlStatement2 =
@@ -42,12 +39,12 @@ public class Database {
                 statement.execute(sqlStatement2);
             }
 
+
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
         }
-
-
     }
+
+
+
 }
-
-
