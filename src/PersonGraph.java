@@ -30,7 +30,6 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
     }
 
     public void addPerson(String name, String surname) {
-        //relatedPersons.putIfAbsent(new Person(name, surname), new ArrayList<>());
         this.addVertex(new Person(name, surname));
     }
 
@@ -41,11 +40,11 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
     }
 
 
-    void addRelationshipEdge(String name1, String surname1, String name2, String surname2, RelationshipEdge label1) { //does this really add an edge? how?
+    void addRelationshipEdge(String name1, String surname1, String name2, String surname2, RelationshipLabels label1) { //does this really add an edge? how?
         Person person1 = new Person(name1, surname1);
         Person person2 = new Person(name2, surname2);
-        relatedPersons.get(person1).add(person2);
-        relatedPersons.get(person2).add(person1);
+        this.addEdge(person1, person2, new RelationshipEdge(label1));
+
     }
 
     void removeRelationshipEdge(String name1, String surname1, String name2, String surname2) { // does this really remove an edge? how?
