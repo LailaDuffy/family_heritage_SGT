@@ -3,13 +3,13 @@ import java.util.Objects;
 
 public class Person {
 
+    private int id;
     private String name;
     private String surname;
     private Gender gender;
-    private Date birthDate;
-    private Date deathDate;
-    private String placeOfBirth;
-    private int age;
+    private String birthDate;
+    private String deathDate;
+
 
     public Person() {}
 
@@ -18,27 +18,35 @@ public class Person {
        this.surname = surname;
     }
 
-    public Person(String name, String surname, Gender gender, Date birthDate, Date deathDate, String placeOfBirth, int age) {
+    public Person(int id, String name, String surname, Gender gender, String birthDate, String deathDate) {
+        this.id = id;
         this.name = name;
         this.surname = surname;
         this.gender = gender;
         this.birthDate = birthDate;
         this.deathDate = deathDate;
-        this.placeOfBirth = placeOfBirth;
-        this.age = age;
+
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Person)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Person person = (Person) o;
-        return getAge() == person.getAge() && Objects.equals(getName(), person.getName()) && Objects.equals(getSurname(), person.getSurname()) && getGender() == person.getGender() && Objects.equals(getBirthDate(), person.getBirthDate()) && Objects.equals(getDeathDate(), person.getDeathDate()) && Objects.equals(getPlaceOfBirth(), person.getPlaceOfBirth());
+        return Objects.equals(id, person.id) && Objects.equals(name, person.name) && Objects.equals(surname, person.surname) && gender == person.gender && Objects.equals(birthDate, person.birthDate) && Objects.equals(deathDate, person.deathDate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), getSurname(), getGender(), getBirthDate(), getDeathDate(), getPlaceOfBirth(), getAge());
+        return Objects.hash(id, name, surname, gender, birthDate, deathDate);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -65,48 +73,32 @@ public class Person {
         this.gender = gender;
     }
 
-    public Date getBirthDate() {
+    public String getBirthDate() {
         return birthDate;
     }
 
-    public void setBirthDate(Date birthDate) {
+    public void setBirthDate(String birthDate) {
         this.birthDate = birthDate;
     }
 
-    public Date getDeathDate() {
+    public String getDeathDate() {
         return deathDate;
     }
 
-    public void setDeathDate(Date deathDate) {
+    public void setDeathDate(String deathDate) {
         this.deathDate = deathDate;
     }
 
-    public String getPlaceOfBirth() {
-        return placeOfBirth;
-    }
-
-    public void setPlaceOfBirth(String placeOfBirth) {
-        this.placeOfBirth = placeOfBirth;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
 
     @Override
     public String toString() {
-        return "Person {" +
-                "name: '" + name + '\'' +
-                ", surname: '" + surname + '\'' +
-                ", gender: " + gender +
-                ", birth date: " + birthDate +
-                ", death date: " + deathDate +
-                ", place of birth: '" + placeOfBirth + '\'' +
-                ", age: " + age +
+        return "Person{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", gender=" + gender +
+                ", birthDate=" + birthDate +
+                ", deathDate=" + deathDate +
                 '}';
     }
 }

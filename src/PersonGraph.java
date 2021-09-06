@@ -29,8 +29,8 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
         this.relatedPersons = relatedPersons;
     }
 
-    public void addPerson(String name, String surname) {
-        this.addVertex(new Person(name, surname));
+    public void addPerson(Person person) {
+        this.addVertex(new Person());
     }
 
     void removePerson(String name, String surname) {

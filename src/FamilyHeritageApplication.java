@@ -1,6 +1,7 @@
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
+import java.sql.*;
 import java.util.*;
 
 import org.jgrapht.*;
@@ -26,6 +27,109 @@ public class FamilyHeritageApplication {
         int choice;
 
         Graph<Person, RelationshipEdge> familyTree = testGraph();
+        ArrayList<Person> arrayListOfPersons = new ArrayList<>();
+        ArrayList<Person> newPersonArrayList = new ArrayList<>();
+
+        String databasePath = "jdbc:sqlite:family_heritage.db";
+
+        try {
+            Connection connection = DriverManager.getConnection(databasePath);
+
+            if (connection != null) {
+                DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+                System.out.println("Connected to database");
+
+                Statement statement = connection.createStatement();
+                String sqlStatement1 =
+                        "CREATE TABLE IF NOT EXISTS persons" +
+                                "(person_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                                "name TEXT NOT NULL," +
+                                "surname TEXT NOT NULL," +
+                                "gender TEXT NOT NULL," +
+                                "birth_date TEXT NOT NULL," +
+                                "death_date TEXT)";
+
+                statement.execute(sqlStatement1);
+
+                String sqlStatement2 =
+                        "CREATE TABLE IF NOT EXISTS relationships" +
+                                "(relationship_id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                                "person_1 TEXT NOT NULL," +
+                                "person_1_id INTEGER," +
+                                "person_2 TEXT NOT NULL," +
+                                "person_2_id INTEGER," +
+                                "relationship_type TEXT NOT NULL," +
+                                "FOREIGN KEY(person_1_id) REFERENCES persons(person_id)," +
+                                "FOREIGN KEY(person_2_id) REFERENCES persons(person_id))";
+
+                statement.execute(sqlStatement2);
+
+                // getting all the persons from the database persons table
+                String sqlStatement3 = "SELECT * FROM persons";
+                ResultSet resultSet = statement.executeQuery(sqlStatement3);
+
+                while (resultSet.next()) {
+                    int person_id = resultSet.getInt("person_id");
+                    String person_name = resultSet.getString("name");
+                    String person_surname = resultSet.getString("surname");
+                    String gender = resultSet.getString("gender");
+                    String birth_date = resultSet.getString("birth_date");
+                    String death_date = resultSet.getString("death_date");
+
+                    Gender genderCastedToEnum = Gender.valueOf(gender);
+
+                    // creating person objects
+                    Person newPerson = new Person();
+                    newPerson.setId(person_id);
+                    newPerson.setName(person_name);
+                    newPerson.setSurname(person_surname);
+                    newPerson.setGender(genderCastedToEnum);
+                    newPerson.setBirthDate(birth_date);
+                    newPerson.setDeathDate(death_date);
+
+                    //adding persons to graph
+                    testGraph().addVertex(newPerson);
+
+                    //adding persons to arraylist (to test if it works)
+                    arrayListOfPersons.add(newPerson);
+
+
+                    //for (Person eachPerson : arrayListOfPersons) {
+                    //int id = eachPerson.getId();
+                    //String sqlStatement4 = "SELECT * FROM relationships WHERE person_1_id = " + id +  "
+                    String query = "SELECT * FROM relationships";
+                    PreparedStatement preparedStatement = connection.prepareStatement(query);
+                    ResultSet rs = preparedStatement.executeQuery(query);
+                    Person personSource = null;
+                    Person personTarget = null;
+                    while (rs.next()) {
+                        RelationshipEdge edge = new RelationshipEdge(RelationshipLabels.valueOf(rs.getString("relationship_type")));
+                        for (Person person1 : arrayListOfPersons) {
+                            if (person1.getId() == rs.getInt("person_1_id")) {
+                                personSource = person1;
+                            }
+                            for (Person person2 : arrayListOfPersons) {
+                                if (person2.getId() == rs.getInt("person_2_id")) {
+                                    personTarget = person2;
+                                }
+                            }
+
+                        }
+                        familyTree.addEdge(personSource, personTarget, edge);
+
+                        newPersonArrayList.add(personSource);
+                        newPersonArrayList.add(personTarget);
+                    }
+
+
+                }
+            }
+
+
+        } catch (SQLException exception) {
+            System.out.println("There was an error: " + exception);
+        }
+
 
         do {
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -46,11 +150,12 @@ public class FamilyHeritageApplication {
             switch (choice) {
                 case 1:
                     // List of persons
-                    System.out.println("Here is a list of every person in the Family Tree: ");
-                    for (Person eachPerson : familyTree.vertexSet()) {
-                        System.out.println(eachPerson.getName() + " " + eachPerson.getSurname());
-                    }
-                    System.out.println();
+//                    System.out.println("Here is a list of every person in the Family Tree: ");
+//                    for (Person eachPerson : familyTree.vertexSet()) {
+//                        System.out.println(eachPerson);
+//                    }
+                    //System.out.println(arrayListOfPersons.toString());
+                    System.out.println(newPersonArrayList);
                     break;
 
                 case 2:
@@ -65,9 +170,10 @@ public class FamilyHeritageApplication {
                             System.out.println(eachPerson.toString());
                             counter++;
                         }
-                    } if (counter == 0) {
-                    System.out.println("A person with this name does not exist in the family tree");
-                }
+                    }
+                    if (counter == 0) {
+                        System.out.println("A person with this name does not exist in the family tree");
+                    }
                     System.out.println();
                     break;
 
@@ -90,23 +196,6 @@ public class FamilyHeritageApplication {
     static Graph testGraph() {
 
         PersonGraph graph = new PersonGraph(RelationshipEdge.class);
-        graph.addPerson("Olivia", "Williams");
-        graph.addPerson("Jack", "Williams");
-        graph.addPerson("Thomas", "Williams");
-        graph.addPerson("Sophia", "Williams");
-
-        graph.addRelationshipEdge("Olivia", "Williams", "Jack", "Williams", RelationshipLabels.wife);
-        graph.addRelationshipEdge("Jack", "Williams", "Olivia", "Williams", RelationshipLabels.husband);
-        graph.addRelationshipEdge("Olivia", "Williams", "Thomas", "Williams", RelationshipLabels.mother);
-        graph.addRelationshipEdge("Thomas", "Williams", "Olivia", "Williams", RelationshipLabels.son);
-        graph.addRelationshipEdge("Jack", "Williams", "Thomas", "Williams", RelationshipLabels.father);
-        graph.addRelationshipEdge("Thomas", "Williams", "Jack", "Williams", RelationshipLabels.son);
-        graph.addRelationshipEdge("Olivia", "Williams", "Sophia", "Williams", RelationshipLabels.mother);
-        graph.addRelationshipEdge("Sophia", "Williams", "Olivia", "Williams", RelationshipLabels.daughter);
-        graph.addRelationshipEdge("Sophia", "Williams", "Jack", "Williams", RelationshipLabels.daughter);
-        graph.addRelationshipEdge("Jack", "Williams", "Sophia", "Williams", RelationshipLabels.father);
-        graph.addRelationshipEdge("Sophia", "Williams", "Thomas", "Williams", RelationshipLabels.sister);
-        graph.addRelationshipEdge("Thomas", "Williams", "Sophia", "Williams", RelationshipLabels.brother);
 
         return graph;
     }
