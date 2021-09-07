@@ -1,12 +1,7 @@
-import org.jgrapht.*;
-import org.jgrapht.alg.connectivity.*;
-import org.jgrapht.alg.interfaces.ShortestPathAlgorithm.*;
-import org.jgrapht.alg.interfaces.*;
-import org.jgrapht.alg.shortestpath.*;
+
 import org.jgrapht.graph.*;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> {
 

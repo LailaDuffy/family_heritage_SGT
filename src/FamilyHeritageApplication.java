@@ -50,47 +50,22 @@ public class FamilyHeritageApplication {
             switch (choice) {
                 case 1:
                     // List of persons
-                    System.out.println("Here is a list of every person in the Family Tree: ");
-                    for (Person eachPerson : familyTree.vertexSet()) {
-                        System.out.println(eachPerson.getName() + " " + eachPerson.getSurname());
-                    }
-                    System.out.println();
+                    showFamilyTreeMembersList(familyTree);
                     break;
 
                 case 2:
                     // Info about a person (name from user input)
-                    System.out.print("Type in a name of person: ");
-                    Scanner scan = new Scanner(System.in);
-                    String inputChoice = scan.nextLine();
-                    int counter = 0; // to check how many people are in the database with the input name
-                    System.out.println("Here is the information about people called " + inputChoice + ": ");
-                    // check if the input name can be found in the database
-                    for (Person eachPerson : familyTree.vertexSet()) {
-                        if (eachPerson.getName().equalsIgnoreCase(inputChoice)) {
-                            System.out.println(eachPerson.toString());
-                            counter++;
-
-                            // find all the relationships that the given person
-                            for (RelationshipEdge eachRelationship : familyTree.edgesOf(eachPerson)) {
-                                Person targetPerson = familyTree.getEdgeTarget(eachRelationship);
-                                System.out.println(inputChoice + " is a " + RelationshipLabels.valueOf(String.valueOf(eachRelationship.getLabel())) + " of " + targetPerson.getName() + " " + targetPerson.getSurname());
-                            }
-                        }
-                    }
-                    if (counter == 0) { // if no people with the input name can be found in the database
-                        System.out.println("A person with this name does not exist in the family tree");
-                    }
-                    System.out.println();
+                    printInfoAboutPerson(familyTree);
                     break;
 
                 case 3:
                     // The oldest person in the list (Graph method)
-
                     System.out.println("The oldest person in the family tree is: ");
                     break;
 
                 case 4:
-                    System.out.println("");
+                    // The youngest person in the list (Graph method)
+                    System.out.println("The youngest person in the family tree is: ");
                     break;
 
                 default:
@@ -203,6 +178,39 @@ public class FamilyHeritageApplication {
             System.out.println("There was an error: " + exception);
         }
 
+    }
+
+    public static void showFamilyTreeMembersList(Graph<Person, RelationshipEdge> familyTree) {
+        System.out.println("Here is a list of every person in the Family Tree: ");
+        for (Person eachPerson : familyTree.vertexSet()) {
+            System.out.println(eachPerson.getName() + " " + eachPerson.getSurname());
+        }
+        System.out.println();
+    }
+
+    public static void printInfoAboutPerson(Graph<Person, RelationshipEdge> familyTree) {
+        System.out.print("Type in a name of person: ");
+        Scanner scan = new Scanner(System.in);
+        String inputChoice = scan.nextLine();
+        int counter = 0; // to check how many people are in the database with the input name
+        System.out.println("Here is the information about people called " + inputChoice + ": ");
+        // check if the input name can be found in the database
+        for (Person eachPerson : familyTree.vertexSet()) {
+            if (eachPerson.getName().equalsIgnoreCase(inputChoice)) {
+                System.out.println(eachPerson.toString());
+                counter++;
+
+                // find all the relationships that the given person
+                for (RelationshipEdge eachRelationship : familyTree.edgesOf(eachPerson)) {
+                    Person targetPerson = familyTree.getEdgeTarget(eachRelationship);
+                    System.out.println(inputChoice + " is a " + RelationshipLabels.valueOf(String.valueOf(eachRelationship.getLabel())) + " of " + targetPerson.getName() + " " + targetPerson.getSurname());
+                }
+            }
+        }
+        if (counter == 0) { // if no people with the input name can be found in the database
+            System.out.println("A person with this name does not exist in the family tree");
+        }
+        System.out.println();
     }
 }
 
