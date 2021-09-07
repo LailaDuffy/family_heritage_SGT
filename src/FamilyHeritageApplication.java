@@ -202,8 +202,10 @@ public class FamilyHeritageApplication {
 
                 // find all the relationships that the given person
                 for (RelationshipEdge eachRelationship : familyTree.edgesOf(eachPerson)) {
-                    Person targetPerson = familyTree.getEdgeTarget(eachRelationship);
-                    System.out.println(inputChoice + " is a " + RelationshipLabels.valueOf(String.valueOf(eachRelationship.getLabel())) + " of " + targetPerson.getName() + " " + targetPerson.getSurname());
+                    if (eachPerson == familyTree.getEdgeSource(eachRelationship)) {
+                        Person targetPerson = familyTree.getEdgeTarget(eachRelationship);
+                        System.out.println(inputChoice + " is a " + RelationshipLabels.valueOf(String.valueOf(eachRelationship.getLabel())) + " of " + targetPerson.getName() + " " + targetPerson.getSurname());
+                    }
                 }
             }
         }
