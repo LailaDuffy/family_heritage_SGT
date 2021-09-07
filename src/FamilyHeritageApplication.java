@@ -183,7 +183,7 @@ public class FamilyHeritageApplication {
     public static void showFamilyTreeMembersList(Graph<Person, RelationshipEdge> familyTree) {
         System.out.println("Here is a list of every person in the Family Tree: ");
         for (Person eachPerson : familyTree.vertexSet()) {
-            System.out.println(eachPerson.getName() + " " + eachPerson.getSurname());
+            System.out.println(eachPerson.getName() + " " + eachPerson.getSurname() + " (born in " + eachPerson.getBirthDate() + ")");
         }
         System.out.println();
     }
@@ -204,7 +204,7 @@ public class FamilyHeritageApplication {
                 for (RelationshipEdge eachRelationship : familyTree.edgesOf(eachPerson)) {
                     if (eachPerson == familyTree.getEdgeSource(eachRelationship)) {
                         Person targetPerson = familyTree.getEdgeTarget(eachRelationship);
-                        System.out.println(inputChoice + " is a " + RelationshipLabels.valueOf(String.valueOf(eachRelationship.getLabel())) + " of " + targetPerson.getName() + " " + targetPerson.getSurname());
+                        System.out.println(inputChoice + " is " + RelationshipLabels.valueOf(String.valueOf(eachRelationship.getLabel())) + " of " + targetPerson.getName() + " " + targetPerson.getSurname());
                     }
                 }
             }
