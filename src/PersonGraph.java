@@ -21,17 +21,6 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
         super(edgeClass);
     }
 
-    public Map<Person, List<Person>> getRelatedPersons() {
-        return relatedPersons;
-    }
-
-    public void setRelatedPersons(Map<Person, List<Person>> relatedPersons) {
-        this.relatedPersons = relatedPersons;
-    }
-
-    public void addPerson(Person person) {
-        this.addVertex(new Person());
-    }
 
     void removePerson(String name, String surname) {
         Person person = new Person(name, surname);

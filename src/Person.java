@@ -93,12 +93,11 @@ public class Person {
     @Override
     public String toString() {
         return "Person{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", surname='" + surname + '\'' +
-                ", gender=" + gender +
-                ", birthDate=" + birthDate +
-                ", deathDate=" + deathDate +
+                "name = '" + name + '\'' +
+                ", surname = '" + surname + '\'' +
+                ", gender = " + gender +
+                ", birthDate = " + birthDate +
+                ", deathDate = " + deathDate +
                 '}';
     }
 }

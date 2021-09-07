@@ -26,13 +26,90 @@ public class FamilyHeritageApplication {
         Scanner in = new Scanner(System.in);
         int choice;
 
-        Graph<Person, RelationshipEdge> familyTree = testGraph();
-        ArrayList<Person> arrayListOfPersons = new ArrayList<>();
-        ArrayList<Person> newPersonArrayList = new ArrayList<>();
+        Graph<Person, RelationshipEdge> familyTree = familyTree();
 
-        String databasePath = "jdbc:sqlite:family_heritage.db";
+        DBConnection(familyTree);
+
+
+        do {
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            System.out.println("Hello! Please choose your option: ");
+            System.out.println("1. The list of persons");
+            System.out.println("2. Info about a person (write name)");
+            System.out.println("3. The oldest person in the list");
+            System.out.println("4. The youngest person in the list");
+            System.out.println("5. Add a person");
+            System.out.println("6. Delete a person");
+            System.out.println("0. - EXIT");
+
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+            System.out.print("Please enter your choice: ");
+            choice = in.nextInt();
+
+            switch (choice) {
+                case 1:
+                    // List of persons
+                    System.out.println("Here is a list of every person in the Family Tree: ");
+                    for (Person eachPerson : familyTree.vertexSet()) {
+                        System.out.println(eachPerson.getName() + " " + eachPerson.getSurname());
+                    }
+                    System.out.println();
+                    break;
+
+                case 2:
+                    // Info about a person (name from user input)
+                    System.out.print("Type in a name of person: ");
+                    Scanner scan = new Scanner(System.in);
+                    String inputChoice = scan.nextLine();
+                    int counter = 0; // to check how many people are in the database with the input name
+                    System.out.println("Here is the information about people called " + inputChoice + ": ");
+                    // check if the input name can be found in the database
+                    for (Person eachPerson : familyTree.vertexSet()) {
+                        if (eachPerson.getName().equalsIgnoreCase(inputChoice)) {
+                            System.out.println(eachPerson.toString());
+                            counter++;
+
+                            // find all the relationships that the given person
+                            for (RelationshipEdge eachRelationship : familyTree.edgesOf(eachPerson)) {
+                                Person targetPerson = familyTree.getEdgeTarget(eachRelationship);
+                                System.out.println(inputChoice + " is a " + RelationshipLabels.valueOf(String.valueOf(eachRelationship.getLabel())) + " of " + targetPerson.getName() + " " + targetPerson.getSurname());
+                            }
+                        }
+                    }
+                    if (counter == 0) { // if no people with the input name can be found in the database
+                        System.out.println("A person with this name does not exist in the family tree");
+                    }
+                    System.out.println();
+                    break;
+
+                case 3:
+                    // The oldest person in the list (Graph method)
+
+                    System.out.println("The oldest person in the family tree is: ");
+                    break;
+
+                case 4:
+                    System.out.println("");
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Please type a number from the given choices.");
+            }
+        } while (choice != 0);
+    }
+
+    static Graph familyTree() {
+
+        PersonGraph graph = new PersonGraph(RelationshipEdge.class);
+
+        return graph;
+    }
+
+    public static void DBConnection(Graph<Person, RelationshipEdge> familyTree) {
 
         try {
+            String databasePath = "jdbc:sqlite:family_heritage.db";
             Connection connection = DriverManager.getConnection(databasePath);
 
             if (connection != null) {
@@ -87,42 +164,38 @@ public class FamilyHeritageApplication {
                     newPerson.setBirthDate(birth_date);
                     newPerson.setDeathDate(death_date);
 
-                    //adding persons to graph
-                    testGraph().addVertex(newPerson);
+                    // adding persons to graph
+                    familyTree.addVertex(newPerson);
 
-                    //adding persons to arraylist (to test if it works)
-                    arrayListOfPersons.add(newPerson);
-
-
-                    //for (Person eachPerson : arrayListOfPersons) {
-                    //int id = eachPerson.getId();
-                    //String sqlStatement4 = "SELECT * FROM relationships WHERE person_1_id = " + id +  "
-                    String query = "SELECT * FROM relationships";
-                    PreparedStatement preparedStatement = connection.prepareStatement(query);
-                    ResultSet rs = preparedStatement.executeQuery(query);
-                    Person personSource = null;
-                    Person personTarget = null;
-                    while (rs.next()) {
-                        RelationshipEdge edge = new RelationshipEdge(RelationshipLabels.valueOf(rs.getString("relationship_type")));
-                        for (Person person1 : arrayListOfPersons) {
-                            if (person1.getId() == rs.getInt("person_1_id")) {
-                                personSource = person1;
-                            }
-                            for (Person person2 : arrayListOfPersons) {
-                                if (person2.getId() == rs.getInt("person_2_id")) {
-                                    personTarget = person2;
-                                }
-                            }
-
-                        }
-                        familyTree.addEdge(personSource, personTarget, edge);
-
-                        newPersonArrayList.add(personSource);
-                        newPersonArrayList.add(personTarget);
-                    }
-
+                    // adding persons to arraylist (to test if it works)
+                    //arrayListOfPersons.add(newPerson);
 
                 }
+
+                // getting relatonship labels from the relationship database table
+                String sqlStatementToGraph = "SELECT * FROM relationships";
+                ResultSet rs = statement.executeQuery(sqlStatementToGraph);
+
+                Person personSource = new Person();
+                Person personTarget = new Person();
+                while (rs.next()) {
+                    RelationshipEdge edge = new RelationshipEdge(RelationshipLabels.valueOf(rs.getString("relationship_type")));
+
+                    for (Person person1 : familyTree.vertexSet()) {
+                        if (person1.getId() == rs.getInt("person_1_id")) {
+                            personSource = person1;
+                        }
+                    }
+                    for (Person person2 : familyTree.vertexSet()) {
+                        if (person2.getId() == rs.getInt("person_2_id")) {
+                            personTarget = person2;
+                        }
+                    }
+                    // adding relationships to the graph
+                    familyTree.addEdge(personSource, personTarget, edge);
+
+                }
+
             }
 
 
@@ -130,76 +203,9 @@ public class FamilyHeritageApplication {
             System.out.println("There was an error: " + exception);
         }
 
-
-        do {
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            System.out.println("Hello! Please choose your option: ");
-            System.out.println("1. The list of persons");
-            System.out.println("2. Info about a person (write name)");
-            System.out.println("3. The oldest person in the list");
-            System.out.println("4. The youngest person in the list");
-            System.out.println("5. Add a person");
-            System.out.println("6. Delete a person");
-            System.out.println("0. - EXIT");
-
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-
-            System.out.print("Please enter your choice: ");
-            choice = in.nextInt();
-
-            switch (choice) {
-                case 1:
-                    // List of persons
-//                    System.out.println("Here is a list of every person in the Family Tree: ");
-//                    for (Person eachPerson : familyTree.vertexSet()) {
-//                        System.out.println(eachPerson);
-//                    }
-                    //System.out.println(arrayListOfPersons.toString());
-                    System.out.println(newPersonArrayList);
-                    break;
-
-                case 2:
-                    // Info about a person (name from user input)
-                    System.out.print("Type in a name of person: ");
-                    Scanner scan = new Scanner(System.in);
-                    String inputChoice = scan.nextLine();
-                    int counter = 0;
-                    for (Person eachPerson : familyTree.vertexSet()) {
-                        if (eachPerson.getName().equalsIgnoreCase(inputChoice)) {
-                            System.out.println("Here is the information about people called " + inputChoice + ": ");
-                            System.out.println(eachPerson.toString());
-                            counter++;
-                        }
-                    }
-                    if (counter == 0) {
-                        System.out.println("A person with this name does not exist in the family tree");
-                    }
-                    System.out.println();
-                    break;
-
-                case 3:
-                    // The oldest person in the list (Graph method)
-
-                    System.out.println("The oldest person in the family tree is: ");
-                    break;
-
-                case 4:
-                    System.out.println("");
-                    break;
-
-                default:
-                    System.out.println("Invalid choice. Please type a number from the given choices.");
-            }
-        } while (choice != 0);
     }
-
-    static Graph testGraph() {
-
-        PersonGraph graph = new PersonGraph(RelationshipEdge.class);
-
-        return graph;
-    }
-
 }
+
+
 
 

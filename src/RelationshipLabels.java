@@ -15,5 +15,7 @@ public enum RelationshipLabels {
     granddaughter,
     cousin,
     niece,
-    nephew
+    nephew,
+    spouses,
+    divorced
 }

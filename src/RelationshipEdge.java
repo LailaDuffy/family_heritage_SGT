@@ -14,9 +14,7 @@ public class RelationshipEdge extends DefaultEdge {
 
     @Override
     public String toString() {
-        return "Relationships{" +
-                "label='" + label + '\'' +
-                '}';
+        return String.valueOf(label);
     }
 
 }
