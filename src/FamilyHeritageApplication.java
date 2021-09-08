@@ -88,7 +88,122 @@ public class FamilyHeritageApplication {
                     break;
 
                 case 6:
-                    // Update a persin in the Family Tree
+                    // Update a person in the Family Tree
+                    System.out.println("Input the name of the person you wish to update: ");
+                    String personToUpdateName = in.next();
+                    System.out.println("Input the surname of the person you wish to update: ");
+                    String personToUpdateSurname = in.next();
+
+                    try {
+                        String databasePath = "jdbc:sqlite:family_heritage.db";
+                        Connection connection = DriverManager.getConnection(databasePath);
+
+                        if (connection != null) {
+                            DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+
+                            PreparedStatement prpStatement = connection.prepareStatement("SELECT * FROM persons WHERE name = ? AND surname = ?");
+                            prpStatement.setString(1, personToUpdateName);
+                            prpStatement.setString(2, personToUpdateSurname);
+                            ResultSet rs = prpStatement.executeQuery();
+
+
+                            while (rs.next()) {
+                                String name = rs.getString("name");
+                                String surname = rs.getString("surname");
+                                String gender = rs.getString("gender");
+                                String birthDate = rs.getString("birth_date");
+                                String deathDate = rs.getString("death_date");
+
+                                System.out.println(name + " " + surname + " (" + gender + ") " + " (birth date: "
+                                        + birthDate + ", death date: " + deathDate + ")" );
+                            }
+
+                            System.out.println("Which part of information do you want to update: ");
+                            System.out.println("1. Name   2. Surname   3. Gender   4. Birth date   5. Death date");
+                            System.out.println("Please input the corresponding number: ");
+                            int input = in.nextInt();
+
+                            switch (input) {
+                                case 1:
+                                    System.out.println("Please input the new name of the person: ");
+                                    String newName = in.next();
+
+                                    PreparedStatement prpStatement1 = connection.prepareStatement("UPDATE persons " +
+                                            "SET name = ? WHERE name = ? AND surname = ?");
+                                    prpStatement1.setString(1, newName);
+                                    prpStatement1.setString(2, personToUpdateName);
+                                    prpStatement1.setString(3, personToUpdateSurname);
+                                    prpStatement1.execute();
+
+                                    break;
+
+                                case 2:
+                                    System.out.println("Please input the new surname of the person: ");
+                                    String newSurname = in.nextLine();
+                                    in.nextLine();
+
+                                    PreparedStatement prpStatement2 = connection.prepareStatement("UPDATE persons " +
+                                            "SET name = ? WHERE name = ? AND surname = ?");
+                                    prpStatement2.setString(1, newSurname);
+                                    prpStatement2.setString(2, personToUpdateName);
+                                    prpStatement2.setString(3, personToUpdateSurname);
+                                    prpStatement2.execute();
+
+                                    break;
+
+                                case 3:
+                                    System.out.println("Please input the new gender of the person: ");
+                                    String newGender = in.nextLine();
+                                    in.nextLine();
+
+                                    PreparedStatement prpStatement3 = connection.prepareStatement("UPDATE persons " +
+                                            "SET name = ? WHERE name = ? AND surname = ?");
+                                    prpStatement3.setString(1, newGender);
+                                    prpStatement3.setString(2, personToUpdateName);
+                                    prpStatement3.setString(3, personToUpdateSurname);
+                                    prpStatement3.execute();
+
+                                    break;
+
+                                case 4:
+                                    System.out.println("Please input the new birth date of the person DD/MM/YYYY: ");
+                                    String newBirthDate = in.nextLine();
+                                    in.nextLine();
+
+                                    PreparedStatement prpStatement4 = connection.prepareStatement("UPDATE persons " +
+                                            "SET name = ? WHERE name = ? AND surname = ?");
+                                    prpStatement4.setString(1, newBirthDate);
+                                    prpStatement4.setString(2, personToUpdateName);
+                                    prpStatement4.setString(3, personToUpdateSurname);
+                                    prpStatement4.execute();
+
+                                    break;
+
+                                case 5:
+                                    System.out.println("Please input the death date of the person DD/MM/YYYY: ");
+                                    String newDeathDate = in.nextLine();
+                                    in.nextLine();
+
+                                    PreparedStatement prpStatement5 = connection.prepareStatement("UPDATE persons " +
+                                            "SET name = ? WHERE name = ? AND surname = ?");
+                                    prpStatement5.setString(1, newDeathDate);
+                                    prpStatement5.setString(2, personToUpdateName);
+                                    prpStatement5.setString(3, personToUpdateSurname);
+                                    prpStatement5.execute();
+
+                                    break;
+
+                                    default:
+                                    System.out.println("Invalid number. Please type a number between 1-5");
+
+                            }
+
+                        }
+                    } catch (SQLException exception) {
+                        System.out.println("Error: " + exception);
+                    }
+
+
 
                     System.out.println();
                     break;
@@ -184,7 +299,7 @@ public class FamilyHeritageApplication {
 
                 }
 
-                // getting relatonship labels from the relationship database table
+                // getting relationship labels from the relationship database table
                 String sqlStatementToGraph = "SELECT * FROM relationships";
                 ResultSet rs = statement.executeQuery(sqlStatementToGraph);
 
@@ -218,6 +333,7 @@ public class FamilyHeritageApplication {
     }
 
     public static void showFamilyTreeMembersList(Graph<Person, RelationshipEdge> familyTree) {
+        DBConnection(familyTree);
         System.out.println("Here is a list of every person in the Family Tree: ");
         for (Person eachPerson : familyTree.vertexSet()) {
             System.out.println(eachPerson.getName() + " " + eachPerson.getSurname() + " (born in " + eachPerson.getBirthDate() + ")");
@@ -417,25 +533,74 @@ public class FamilyHeritageApplication {
                 String name = scanner.nextLine();
                 System.out.print("Enter the surname: ");
                 String surname = scanner.nextLine();
-                System.out.print("Enter the gender (female/male/other): ");
-                String gender = scanner.next().toLowerCase(Locale.ROOT);
-                System.out.print("Enter birth date DD/MM/YYYY: ");
-                String birth_date = scanner.next();
-                System.out.print("Enter death date DD/MM/YYYY (enter '-' if not applicable): ");
-                String death_date = scanner.next();
 
-                String query = "INSERT INTO persons (name, surname, gender, birth_date, death_date) " +
-                        "VALUES (?, ?, ?, ?, ?)";
 
-                PreparedStatement preparedStatement = connection.prepareStatement(query);
-                preparedStatement.setString(1, name);
-                preparedStatement.setString(2, surname);
-                preparedStatement.setString(3, gender);
-                preparedStatement.setString(4, birth_date);
-                preparedStatement.setString(5, death_date);
+                String query = "SELECT * FROM persons WHERE name = ? AND surname = ?";
+                PreparedStatement prpStatement = connection.prepareStatement(query);
+                prpStatement.setString(1, name);
+                prpStatement.setString(2, surname);
+                ResultSet resultSet = prpStatement.executeQuery(query);
 
-                preparedStatement.execute();
+                if (resultSet.next() == false) {
+
+                    System.out.print("Enter the gender (female/male/other): ");
+                    String gender = scanner.next().toLowerCase(Locale.ROOT);
+                    System.out.print("Enter birth date DD/MM/YYYY: ");
+                    String birth_date = scanner.next();
+                    System.out.print("Enter death date DD/MM/YYYY (enter '-' if not applicable): ");
+                    String death_date = scanner.next();
+
+                    String query1 = "INSERT INTO persons (name, surname, gender, birth_date, death_date) " +
+                            "VALUES (?, ?, ?, ?, ?)";
+
+                    PreparedStatement preparedStatement = connection.prepareStatement(query1);
+                    preparedStatement.setString(1, name);
+                    preparedStatement.setString(2, surname);
+                    preparedStatement.setString(3, gender);
+                    preparedStatement.setString(4, birth_date);
+                    preparedStatement.setString(5, death_date);
+
+                    preparedStatement.execute();
+
+                }
+            } else {
+                System.out.println("There already is such a person");
             }
+
+            System.out.println("Now you will have to input information about one of  the following: 1. Mother " +
+                    "2. Father 3. Spouse");
+            int relationship = scanner.nextInt();
+
+            switch (relationship) {
+                case 1: //mother
+                    RelationshipEdge mother = new RelationshipEdge(RelationshipLabels.mother);
+
+
+                    System.out.println("Please write name of mother: ");
+                    String motherName = scanner.next();
+                    System.out.println("Please write surname of mother: ");
+                    String motherSurname = scanner.next();
+
+
+
+                    break;
+
+                case 2: //father
+                    RelationshipEdge father = new RelationshipEdge(RelationshipLabels.father);
+                    break;
+
+                case 3:
+                    RelationshipEdge spouse = new RelationshipEdge(RelationshipLabels.spouses);
+                    break;
+
+                default:
+                    System.out.println("Invalid choice");
+            }
+
+            System.out.println();
+
+
+
 
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
