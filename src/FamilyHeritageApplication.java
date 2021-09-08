@@ -115,7 +115,7 @@ public class FamilyHeritageApplication {
                                 String deathDate = rs.getString("death_date");
 
                                 System.out.println(name + " " + surname + " (" + gender + ") " + " (birth date: "
-                                        + birthDate + ", death date: " + deathDate + ")" );
+                                        + birthDate + ", death date: " + deathDate + ")");
                             }
 
                             System.out.println("Which part of information do you want to update: ");
@@ -193,7 +193,7 @@ public class FamilyHeritageApplication {
 
                                     break;
 
-                                    default:
+                                default:
                                     System.out.println("Invalid number. Please type a number between 1-5");
 
                             }
@@ -204,14 +204,60 @@ public class FamilyHeritageApplication {
                     }
 
 
-
                     System.out.println();
                     break;
 
                 case 7:
                     // Remove a person from the Family Tree
 
-                    System.out.println();
+                    System.out.println("Enter the name of person you want to delete: ");
+                    String nameToDelete = in.next();
+                    System.out.println("Enter the surname of person you want to delete: ");
+                    String surnameToDelete = in.next();
+
+                    try {
+                        String databasePath = "jdbc:sqlite:family_heritage.db";
+                        Connection connection = DriverManager.getConnection(databasePath);
+
+                        if (connection != null) {
+                            DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+
+                            PreparedStatement prpStatement = connection.prepareStatement("SELECT * FROM persons " +
+                                    "WHERE name = ? AND surname = ?");
+                            prpStatement.setString(1, nameToDelete);
+                            prpStatement.setString(2, surnameToDelete);
+                            ResultSet rs = prpStatement.executeQuery();
+
+                            while (rs.next()) {
+                                String name = rs.getString("name");
+                                String surname = rs.getString("surname");
+                                String gender = rs.getString("gender");
+                                String birthDate = rs.getString("birth_date");
+                                String deathDate = rs.getString("death_date");
+
+                                System.out.println(name + " " + surname + " (" + gender + ") " + " (birth date: "
+                                        + birthDate + ", death date: " + deathDate + ")");
+                            }
+
+                            System.out.println("Is this the person you want to remove from the family tree?");
+                            System.out.println("Enter the number: ");
+                            System.out.println("1. Yes / 2. No");
+                            int input = in.nextInt();
+
+                            if (input == 1) {
+                                PreparedStatement prpStatement1 = connection.prepareStatement("DELETE FROM persons WHERE name = ? AND surname = ?");
+                                prpStatement1.setString(1, nameToDelete);
+                                prpStatement1.setString(2, surnameToDelete);
+                                prpStatement1.execute();
+                            } else {
+                                System.out.println("This person won't be removed");
+                            }
+
+                        }
+                    } catch (SQLException exception) {
+                        System.out.println("Error: " + exception);
+                    }
+
                     break;
 
                 case 8:
@@ -582,7 +628,6 @@ public class FamilyHeritageApplication {
                     String motherSurname = scanner.next();
 
 
-
                     break;
 
                 case 2: //father
@@ -598,8 +643,6 @@ public class FamilyHeritageApplication {
             }
 
             System.out.println();
-
-
 
 
         } catch (SQLException exception) {
@@ -629,7 +672,8 @@ public class FamilyHeritageApplication {
                     System.out.println(eachPerson.getName() + " " + eachPerson.getSurname() + ", born in " + eachPerson.getBirthDate() + ", age " + eachPerson.calculateAge());
                     counter++;
                 }
-            } if (counter == 0) {
+            }
+            if (counter == 0) {
                 System.out.println("There is nobody born in the given month.");
             }
         } else {
