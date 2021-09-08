@@ -1,6 +1,4 @@
-
 import org.jgrapht.graph.*;
-
 import java.util.*;
 
 public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> {

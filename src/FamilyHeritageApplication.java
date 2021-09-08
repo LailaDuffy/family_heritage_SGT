@@ -2,8 +2,12 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
 import java.sql.*;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import org.jgrapht.*;
@@ -30,22 +34,26 @@ public class FamilyHeritageApplication {
         int choice;
 
         Graph<Person, RelationshipEdge> familyTree = familyTree();
-
         DBConnection(familyTree);
 
-
+        // The Main Menu
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println("Hello and welcome to the Family Heritage Application! ");
         do {
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-            System.out.println("Hello! Please choose your option: ");
-            System.out.println("1. The list of persons");
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            System.out.println("Please choose your option from the Menu below: ");
+            System.out.println();
+            System.out.println("1. The list of all people in the Family Tree");
             System.out.println("2. Info about a person (write name)");
-            System.out.println("3. The oldest person in the list");
-            System.out.println("4. The youngest person in the list");
-            System.out.println("5. Add a person");
-            System.out.println("6. Delete a person");
+            System.out.println("3. The oldest person in the Family Tree");
+            System.out.println("4. The youngest person in the Family Tree");
+            System.out.println("5. Add a person to the Family Tree");
+            System.out.println("6. Update a person in the Family Tree");
+            System.out.println("7. Remove a person from the Family Tree");
+            System.out.println("8. Find out who have birthdays in chosen month");
             System.out.println("0. - EXIT");
-
-            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            System.out.println();
+            System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 
             System.out.print("Please enter your choice: ");
             choice = in.nextInt();
@@ -62,35 +70,43 @@ public class FamilyHeritageApplication {
                     break;
 
                 case 3:
-                    // The oldest person in the list (Graph method)
-                    Person oldestPerson = new Person();
-                    for (Person eachPerson : familyTree.vertexSet()) {
-                        Date birthDay = new Date();
-                        Date oldestPersonBirthDay = new Date();
-                        oldestPerson.setBirthDate(new SimpleDateFormat("dd/MM/yyyy").format(oldestPersonBirthDay));
-
-                        try {
-                            birthDay = new SimpleDateFormat("dd/MM/yyyy").parse(eachPerson.getBirthDate());
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
-                        if (birthDay.before(oldestPersonBirthDay)) {
-                            oldestPerson = eachPerson;
-                        }
-                    }
-                    int age = oldestPerson.calculateAge();
-                    System.out.println("The oldest person in the family tree is: " + oldestPerson.getName() + " " + oldestPerson.getSurname());
-                    System.out.println("They are " + age + " years old");
+                    // The oldest person in the family tree
+                    calculateOldestPerson();
                     System.out.println();
                     break;
 
                 case 4:
-                    // The youngest person in the list (Graph method)
-                    System.out.println("The youngest person in the family tree is: ");
+                    // The youngest person in the family tree
+                    calculateYoungestPerson();
+                    System.out.println();
+                    break;
+
+                case 5:
+                    // Add a person to the Family Tree
+                    addPerson();
+                    System.out.println();
+                    break;
+
+                case 6:
+                    // Update a persin in the Family Tree
+
+                    System.out.println();
+                    break;
+
+                case 7:
+                    // Remove a person from the Family Tree
+
+                    System.out.println();
+                    break;
+
+                case 8:
+                    // Find out birthdays based on month
+                    peopleBornInSameMonth(familyTree);
+                    System.out.println();
                     break;
 
                 default:
-                    System.out.println("Invalid choice. Please type a number from the given choices.");
+                    System.out.println("Invalid choice. Please type a number from the given Menu.");
             }
         } while (choice != 0);
     }
@@ -110,7 +126,7 @@ public class FamilyHeritageApplication {
 
             if (connection != null) {
                 DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
-                System.out.println("Connected to database");
+                //System.out.println("Connected to database");
 
                 Statement statement = connection.createStatement();
                 String sqlStatement1 =
@@ -234,6 +250,226 @@ public class FamilyHeritageApplication {
             System.out.println("A person with this name does not exist in the family tree");
         }
         System.out.println();
+    }
+
+    public static void calculateOldestPerson() {
+        String databasePath = "jdbc:sqlite:family_heritage.db";
+
+        // OLDEST PERSON DEAD OR ALIVE
+        try {
+            Connection connection = DriverManager.getConnection(databasePath);
+
+            if (connection != null) {
+                DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+                // System.out.println("Connected to database: " + metaData.getDatabaseProductName() +
+                //         " " + metaData.getDatabaseProductVersion());
+
+                Statement statement = connection.createStatement();
+
+                String sqlStatement =
+                        "SELECT * FROM persons";
+                ResultSet rs = statement.executeQuery(sqlStatement);
+
+                // initializing variables to store name, surname, age
+                String nameOldest = null;
+                String surnameOldest = null;
+                String birthDateOldest = null;
+                int oldest = 0;
+
+                // getting information from database
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    String surname = rs.getString("surname");
+                    String birthDate = rs.getString("birth_date");
+                    String deathDate = rs.getString("death_date");
+
+                    // converting string to LocalDate to do the calculations
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    LocalDate localDateBirth = LocalDate.parse(birthDate, dtf);
+
+                    // if death date for person is present and matches regex (i.e., is not a string or other input, it calculates how long the person lived
+                    if (deathDate != null && deathDate.matches("(([0][1-9])|([12][0-9])|([3][0-1]))[/]" +
+                            "(([0][1-9])|([1][012]))[/](([1][0-9][0-9][0-9])|([2][0][0-9][0-9]))")) {
+                        LocalDate localDateDeath = LocalDate.parse(deathDate, dtf);
+                        Period age = Period.between(localDateBirth, localDateDeath);    // age is calculated
+                        int ageYears = age.getYears();
+
+                        // checking if it's the oldest age so far
+                        if (ageYears > oldest) {
+                            oldest = ageYears;
+                            nameOldest = name;
+                            surnameOldest = surname;
+                        }
+
+                        // if person is alive, it calculates persons age
+                    } else {
+                        LocalDate today = LocalDate.now();
+                        Period age = Period.between(localDateBirth, today);     // age is calculated
+                        int age2 = age.getYears();
+
+                        // checking if it's the oldest age so far
+                        if (age2 > oldest) {
+                            oldest = age2;
+                            nameOldest = name;
+                            surnameOldest = surname;
+                            birthDateOldest = birthDate;
+                        }
+                    }
+                }
+
+                System.out.println("The person who has lived the longest is " + nameOldest + " " + surnameOldest + ": " + oldest + " years (born in " + birthDateOldest + ")");
+            }
+
+        } catch (SQLException exception) {
+            System.out.println("There was an error: " + exception);
+        }
+    }
+
+    public static void calculateYoungestPerson() {
+        String databasePath = "jdbc:sqlite:family_heritage.db";
+
+        // YOUNGEST LIVING PERSON
+        try {
+            Connection connection = DriverManager.getConnection(databasePath);
+
+            if (connection != null) {
+                DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+                //System.out.println("Connected to database: " + metaData.getDatabaseProductName() +
+                //        " " + metaData.getDatabaseProductVersion());
+
+                Statement statement = connection.createStatement();
+
+                String sqlStatement =
+                        "SELECT * FROM persons";
+                ResultSet rs = statement.executeQuery(sqlStatement);
+
+                // initializing variables to store name, surname, age
+                String nameYoungest = null;
+                String surnameYoungest = null;
+                String birthDateYoungest = null;
+                int youngest = 120;
+
+                // getting information from database
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    String surname = rs.getString("surname");
+                    String birthDate = rs.getString("birth_date");
+                    String deathDate = rs.getString("death_date");
+
+                    // converting string to LocalDate to do the calculations
+                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                    LocalDate localDateBirth = LocalDate.parse(birthDate, dtf);
+
+                    // if death date for person is present and matches regex (i.e., is not a string or other input, it calculates how long the person lived
+                    if (deathDate != null && deathDate.matches("(([0][1-9])|([12][0-9])|([3][0-1]))[/]" +
+                            "(([0][1-9])|([1][012]))[/](([1][0-9][0-9][0-9])|([2][0][0-9][0-9]))")) {
+                        LocalDate localDateDeath = LocalDate.parse(deathDate, dtf);
+                        Period age = Period.between(localDateBirth, localDateDeath);    // age is calculated
+                        int ageYears = age.getYears();
+                        ageYears = 100;
+
+                        // checking if it's the youngest age so far
+                        if (ageYears < youngest) {
+                            youngest = ageYears;
+                            nameYoungest = name;
+                            surnameYoungest = surname;
+                            birthDateYoungest = birthDate;
+                        }
+
+                        // if person is alive, it calculates persons age
+                    } else {
+                        LocalDate today = LocalDate.now();
+                        Period age = Period.between(localDateBirth, today);     // age is calculated
+                        int age2 = age.getYears();
+
+                        // checking if it's the youngest age so far
+                        if (age2 < youngest) {
+                            youngest = age2;
+                            nameYoungest = name;
+                            surnameYoungest = surname;
+                            birthDateYoungest = birthDate;
+                        }
+                    }
+                }
+
+                System.out.println("The youngest person is " + nameYoungest + " " + surnameYoungest + ": " + youngest + " year(s) old (born in " + birthDateYoungest + ")");
+            }
+
+        } catch (SQLException exception) {
+            System.out.println("There was an error: " + exception);
+        }
+
+    }
+
+    public static void addPerson() {
+        Scanner scanner = new Scanner(System.in);
+        String databasePath = "jdbc:sqlite:family_heritage.db";
+
+        try {
+            Connection connection = DriverManager.getConnection(databasePath);
+
+            if (connection != null) {
+                DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+                //System.out.println("Connected to database");
+                Statement statement = connection.createStatement();
+
+                System.out.print("Enter the name: ");
+                String name = scanner.nextLine();
+                System.out.print("Enter the surname: ");
+                String surname = scanner.nextLine();
+                System.out.print("Enter the gender (female/male/other): ");
+                String gender = scanner.next().toLowerCase(Locale.ROOT);
+                System.out.print("Enter birth date DD/MM/YYYY: ");
+                String birth_date = scanner.next();
+                System.out.print("Enter death date DD/MM/YYYY (enter '-' if not applicable): ");
+                String death_date = scanner.next();
+
+                String query = "INSERT INTO persons (name, surname, gender, birth_date, death_date) " +
+                        "VALUES (?, ?, ?, ?, ?)";
+
+                PreparedStatement preparedStatement = connection.prepareStatement(query);
+                preparedStatement.setString(1, name);
+                preparedStatement.setString(2, surname);
+                preparedStatement.setString(3, gender);
+                preparedStatement.setString(4, birth_date);
+                preparedStatement.setString(5, death_date);
+
+                preparedStatement.execute();
+            }
+
+        } catch (SQLException exception) {
+            System.out.println("There was an error: " + exception);
+        }
+    }
+
+    public static void peopleBornInSameMonth(Graph<Person, RelationshipEdge> familyTree) throws ParseException {
+        System.out.print("Type the month as a number (e.g. 1 = January, 2 = February, etc): ");
+        Scanner sc = new Scanner(System.in);
+        // get an input from the user as an integer
+        int inputMonth = sc.nextInt();
+        String inputMonthToString = String.valueOf(inputMonth);
+
+        DateFormat fromStringToDate = new SimpleDateFormat("dd/MM/yyyy");
+
+        if (inputMonthToString != null && inputMonthToString.matches("^(1[0-2]|[1-9])$")) {
+
+            System.out.println("Here is everyone that is born in the given month: ");
+            // counter for the case when there is nobody born in the given month
+            int counter = 0;
+            // loop trhough the family tree persons list
+            for (Person eachPerson : familyTree.vertexSet()) {
+                Date birthDate = fromStringToDate.parse(eachPerson.getBirthDate());
+                // find all the birthdays that match the user input month number
+                if (birthDate.getMonth() + 1 == inputMonth) {
+                    System.out.println(eachPerson.getName() + " " + eachPerson.getSurname() + ", born in " + eachPerson.getBirthDate() + ", age " + eachPerson.calculateAge());
+                    counter++;
+                }
+            } if (counter == 0) {
+                System.out.println("There is nobody born in the given month.");
+            }
+        } else {
+            System.out.println("Invalid month number, the number must be between 1 and 12. Plese check input and try again!");
+        }
     }
 }
 

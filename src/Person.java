@@ -1,9 +1,8 @@
-
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Objects;
 
 public class Person {
@@ -94,17 +93,6 @@ public class Person {
         this.deathDate = deathDate;
     }
 
-    public int calculateAge() throws ParseException {
-
-        LocalDate today = LocalDate.now();
-        Date date = new SimpleDateFormat("dd/MM/yyyy").parse(getBirthDate());
-        LocalDate personBirthDate = convertToLocalDate(date);
-
-        int age = Period.between(personBirthDate, today).getYears();
-
-        return age;
-    }
-
     @Override
     public String toString() {
         return "Person{" +
@@ -119,4 +107,12 @@ public class Person {
     public LocalDate convertToLocalDate(Date dateToConvert) {
         return new java.sql.Date(dateToConvert.getTime()).toLocalDate();
     }
+
+    public int calculateAge() throws ParseException {
+        LocalDate currentDate = LocalDate.now();
+        Date date = new SimpleDateFormat("dd/MM/yyyy").parse(getBirthDate());
+        LocalDate birthDate = convertToLocalDate(date);
+        return Period.between(birthDate, currentDate).getYears();
+    }
+
 }
