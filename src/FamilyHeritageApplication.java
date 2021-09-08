@@ -2,6 +2,8 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import org.jgrapht.*;
@@ -17,11 +19,12 @@ import org.jgrapht.alg.shortestpath.*;
 import org.jgrapht.graph.*;
 
 import java.util.*;
+import java.util.Date;
 
 public class FamilyHeritageApplication {
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
 
         Scanner in = new Scanner(System.in);
         int choice;
@@ -60,7 +63,25 @@ public class FamilyHeritageApplication {
 
                 case 3:
                     // The oldest person in the list (Graph method)
-                    System.out.println("The oldest person in the family tree is: ");
+                    Person oldestPerson = new Person();
+                    for (Person eachPerson : familyTree.vertexSet()) {
+                        Date birthDay = new Date();
+                        Date oldestPersonBirthDay = new Date();
+                        oldestPerson.setBirthDate(new SimpleDateFormat("dd/MM/yyyy").format(oldestPersonBirthDay));
+
+                        try {
+                            birthDay = new SimpleDateFormat("dd/MM/yyyy").parse(eachPerson.getBirthDate());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        if (birthDay.before(oldestPersonBirthDay)) {
+                            oldestPerson = eachPerson;
+                        }
+                    }
+                    int age = oldestPerson.calculateAge();
+                    System.out.println("The oldest person in the family tree is: " + oldestPerson.getName() + " " + oldestPerson.getSurname());
+                    System.out.println("They are " + age + " years old");
+                    System.out.println();
                     break;
 
                 case 4:
