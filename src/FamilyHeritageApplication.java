@@ -90,7 +90,7 @@ public class FamilyHeritageApplication {
 
                 case 6:
                     // Add relationships to persons in the Family Tree
-
+                    addRelationships();
                     System.out.println();
                     break;
                 case 7:
