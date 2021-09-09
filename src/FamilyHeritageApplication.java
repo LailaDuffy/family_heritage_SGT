@@ -48,9 +48,10 @@ public class FamilyHeritageApplication {
             System.out.println("3. The oldest person in the Family Tree");
             System.out.println("4. The youngest person in the Family Tree");
             System.out.println("5. Add a person to the Family Tree");
-            System.out.println("6. Update a person in the Family Tree");
-            System.out.println("7. Remove a person from the Family Tree");
-            System.out.println("8. Find out who have birthdays in chosen month");
+            System.out.println("6. Add relationships between persons in the Family Tree");
+            System.out.println("7. Update a person in the Family Tree");
+            System.out.println("8. Remove a person from the Family Tree");
+            System.out.println("9. Find out who have birthdays in chosen month");
             System.out.println("0. - EXIT");
             System.out.println();
             System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -88,6 +89,11 @@ public class FamilyHeritageApplication {
                     break;
 
                 case 6:
+                    // Add relationships to persons in the Family Tree
+
+                    System.out.println();
+                    break;
+                case 7:
                     // Update a person in the Family Tree
                     System.out.println("Input the name of the person you wish to update: ");
                     String personToUpdateName = in.next();
@@ -208,7 +214,7 @@ public class FamilyHeritageApplication {
                     System.out.println();
                     break;
 
-                case 7:
+                case 8:
                     // Remove a person from the Family Tree
 
                     // asking the user for name and surname of person to delete
@@ -254,8 +260,8 @@ public class FamilyHeritageApplication {
                             if (counter == 1) {
                                 // upon confirmation set the id to be deleted
                                 System.out.println("Is this the person you want to remove from the family tree?");
+                                System.out.println("Please choose betweeen numbers: 1. Yes | 2. No");
                                 System.out.println("Enter the number: ");
-                                System.out.println("1. Yes / 2. No");
                                 int input = in.nextInt();
 
                                 if (input == 1) {
@@ -289,7 +295,7 @@ public class FamilyHeritageApplication {
                                     // upon confirmation set id to be deleted
                                     System.out.println("Is this the person you wish to remove from the family tree?");
                                     System.out.println("--- " + name + " " + surname + " (" + gender + ") " + " (birth date: "
-                                            + birthDate + ", death date: " + deathDate + ")" );
+                                            + birthDate + ", death date: " + deathDate + ")");
                                     System.out.println();
                                     System.out.println("Enter the number: ");
                                     System.out.println("1. Yes / 2. No");
@@ -326,9 +332,9 @@ public class FamilyHeritageApplication {
 
                     break;
 
-                case 8:
+                case 9:
                     // Find out birthdays based on month
-                    peopleBornInSameMonth(familyTree);
+                    peopleBornInTheSameMonth(familyTree);
                     System.out.println();
                     break;
 
@@ -406,9 +412,6 @@ public class FamilyHeritageApplication {
                     // adding persons to graph
                     familyTree.addVertex(newPerson);
 
-                    // adding persons to arraylist (to test if it works)
-                    //arrayListOfPersons.add(newPerson);
-
                 }
 
                 // getting relationship labels from the relationship database table
@@ -432,11 +435,8 @@ public class FamilyHeritageApplication {
                     }
                     // adding relationships to the graph
                     familyTree.addEdge(personSource, personTarget, edge);
-
                 }
-
             }
-
 
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
@@ -454,6 +454,7 @@ public class FamilyHeritageApplication {
     }
 
     public static void printInfoAboutPerson(Graph<Person, RelationshipEdge> familyTree) {
+        DBConnection(familyTree);
         System.out.print("Type in a name of person: ");
         Scanner scan = new Scanner(System.in);
         String inputChoice = scan.nextLine();
@@ -481,10 +482,10 @@ public class FamilyHeritageApplication {
     }
 
     public static void calculateOldestPerson() {
-        String databasePath = "jdbc:sqlite:family_heritage.db";
 
         // OLDEST PERSON DEAD OR ALIVE
         try {
+            String databasePath = "jdbc:sqlite:family_heritage.db";
             Connection connection = DriverManager.getConnection(databasePath);
 
             if (connection != null) {
@@ -544,7 +545,6 @@ public class FamilyHeritageApplication {
                         }
                     }
                 }
-
                 System.out.println("The person who has lived the longest is " + nameOldest + " " + surnameOldest + ": " + oldest + " years (born in " + birthDateOldest + ")");
             }
 
@@ -554,10 +554,10 @@ public class FamilyHeritageApplication {
     }
 
     public static void calculateYoungestPerson() {
-        String databasePath = "jdbc:sqlite:family_heritage.db";
 
         // YOUNGEST LIVING PERSON
         try {
+            String databasePath = "jdbc:sqlite:family_heritage.db";
             Connection connection = DriverManager.getConnection(databasePath);
 
             if (connection != null) {
@@ -619,7 +619,6 @@ public class FamilyHeritageApplication {
                         }
                     }
                 }
-
                 System.out.println("The youngest person is " + nameYoungest + " " + surnameYoungest + ": " + youngest + " year(s) old (born in " + birthDateYoungest + ")");
             }
 
@@ -630,10 +629,17 @@ public class FamilyHeritageApplication {
     }
 
     public static void addPerson() {
+
         Scanner scanner = new Scanner(System.in);
-        String databasePath = "jdbc:sqlite:family_heritage.db";
+        System.out.print("Enter the new person's name only: ");
+        String nameNewPerson = scanner.nextLine();
+        System.out.print("Enter the new person's surname: ");
+        String surnameNewPerson = scanner.nextLine();
+        int idNewPerson = 0;
+        int userInputNumber = 0;
 
         try {
+            String databasePath = "jdbc:sqlite:family_heritage.db";
             Connection connection = DriverManager.getConnection(databasePath);
 
             if (connection != null) {
@@ -641,88 +647,224 @@ public class FamilyHeritageApplication {
                 //System.out.println("Connected to database");
                 Statement statement = connection.createStatement();
 
-                System.out.print("Enter the name: ");
-                String name = scanner.nextLine();
-                System.out.print("Enter the surname: ");
-                String surname = scanner.nextLine();
-
-
+                // checking if the new person already exists in the family tree
                 String query = "SELECT * FROM persons WHERE name = ? AND surname = ?";
                 PreparedStatement prpStatement = connection.prepareStatement(query);
-                prpStatement.setString(1, name);
-                prpStatement.setString(2, surname);
-                ResultSet resultSet = prpStatement.executeQuery(query);
+                prpStatement.setString(1, nameNewPerson);
+                prpStatement.setString(2, surnameNewPerson);
+                ResultSet resultSet = prpStatement.executeQuery();
 
-                if (resultSet.next() == false) {
+
+                if (resultSet.next() == false) { // if they do not exist
 
                     System.out.print("Enter the gender (female/male/other): ");
-                    String gender = scanner.next().toLowerCase(Locale.ROOT);
+                    String genderNewPerson = scanner.next().toLowerCase(Locale.ROOT);
                     System.out.print("Enter birth date DD/MM/YYYY: ");
-                    String birth_date = scanner.next();
+                    String birth_dateNewPerson = scanner.next();
                     System.out.print("Enter death date DD/MM/YYYY (enter '-' if not applicable): ");
-                    String death_date = scanner.next();
+                    String death_dateNewPerson = scanner.next();
 
                     String query1 = "INSERT INTO persons (name, surname, gender, birth_date, death_date) " +
                             "VALUES (?, ?, ?, ?, ?)";
 
                     PreparedStatement preparedStatement = connection.prepareStatement(query1);
-                    preparedStatement.setString(1, name);
-                    preparedStatement.setString(2, surname);
-                    preparedStatement.setString(3, gender);
-                    preparedStatement.setString(4, birth_date);
-                    preparedStatement.setString(5, death_date);
+                    preparedStatement.setString(1, nameNewPerson);
+                    preparedStatement.setString(2, surnameNewPerson);
+                    preparedStatement.setString(3, genderNewPerson);
+                    preparedStatement.setString(4, birth_dateNewPerson);
+                    preparedStatement.setString(5, death_dateNewPerson);
 
-                    preparedStatement.execute();
+                    preparedStatement.executeUpdate();
 
+                    // finding the newly added person in database by name and surname
+                    PreparedStatement prpStatementNewPerson = connection.prepareStatement("SELECT * FROM persons " +
+                            "WHERE name = ? AND surname = ?");
+                    prpStatementNewPerson.setString(1, nameNewPerson);
+                    prpStatementNewPerson.setString(2, surnameNewPerson);
+
+                    ResultSet rs1 = prpStatementNewPerson.executeQuery();
+
+                    // getting new persons id
+                    while (rs1.next()) {
+                        idNewPerson = rs1.getInt("person_id");
+                    }
+
+                    // confirming that the person has been added
+                    if (idNewPerson != 0) {
+                        System.out.println(nameNewPerson + " " + surnameNewPerson + " has been added to the Family Tree.");
+                        System.out.println("To add relationships please choose the 'Add relationsips' option from the Menu!");
+                        System.out.println();
+                    }
+
+                } else {
+                    System.out.println("This person already exists in the family tree");
+                    PreparedStatement prpStatement10 = connection.prepareStatement("SELECT * FROM persons " +
+                            "WHERE name = ? AND surname = ?");
+                    prpStatement10.setString(1, nameNewPerson);
+                    prpStatement10.setString(2, surnameNewPerson);
+
+                    ResultSet rs10 = prpStatement10.executeQuery();
+
+                    // getting and printing person's information
+                    int existingPersonID = 0;
+                    int count = 0;
+                    System.out.print("Person(s) found: ");
+                    while (rs10.next()) {
+                        String name = rs10.getString("name");
+                        String surname = rs10.getString("surname");
+                        String gender = rs10.getString("gender");
+                        String birthDate = rs10.getString("birth_date");
+                        String deathDate = rs10.getString("death_date");
+
+                        System.out.println("--- " + name + " " + surname + " (" + gender + ") " + " (birth date: "
+                                + birthDate + ", death date: " + deathDate + ")");
+                        count++;
+                    }
+                    // if there is only one person (counter == 1)
+                    if (count == 1) {
+                        // upon confirmation set the id to be set as related person
+                        System.out.println("Is this the person you wanted to add to the Family Tree?");
+                        System.out.println("Please choose between numbers 1. Yes | 2. No");
+                        System.out.print("Enter the number: ");
+                        int input = scanner.nextInt();
+
+                        if (input == 1) {
+                            System.out.println("No further action required.");
+                            System.out.println("To add relationships please choose the 'Add relationsips' option from the Menu!");
+                            return;
+                        } else {
+                            System.out.print("Enter the gender (female/male/other): ");
+                            String genderNewPerson = scanner.next().toLowerCase(Locale.ROOT);
+                            System.out.print("Enter birth date DD/MM/YYYY: ");
+                            String birth_dateNewPerson = scanner.next();
+                            System.out.print("Enter death date DD/MM/YYYY (enter '-' if not applicable): ");
+                            String death_dateNewPerson = scanner.next();
+
+                            String query2 = "INSERT INTO persons (name, surname, gender, birth_date, death_date) " +
+                                    "VALUES (?, ?, ?, ?, ?)";
+
+                            PreparedStatement preparedStatement2 = connection.prepareStatement(query2);
+                            preparedStatement2.setString(1, nameNewPerson);
+                            preparedStatement2.setString(2, surnameNewPerson);
+                            preparedStatement2.setString(3, genderNewPerson);
+                            preparedStatement2.setString(4, birth_dateNewPerson);
+                            preparedStatement2.setString(5, death_dateNewPerson);
+
+                            preparedStatement2.execute();
+
+                            // finding the newly added person in database by name and surname
+                            PreparedStatement prpStatementNewPersonCheck = connection.prepareStatement("SELECT * FROM persons " +
+                                    "WHERE name = ? AND surname = ?");
+                            prpStatementNewPersonCheck.setString(1, nameNewPerson);
+                            prpStatementNewPersonCheck.setString(2, surnameNewPerson);
+
+                            ResultSet rs2 = prpStatementNewPersonCheck.executeQuery();
+
+                            // getting new persons id
+                            while (rs2.next()) {
+                                idNewPerson = rs2.getInt("person_id");
+                            }
+
+                            // confirming that the person has been added
+                            if (idNewPerson != 0) {
+                                System.out.println(nameNewPerson + " " + surnameNewPerson + " has been added to the Family Tree.");
+                                System.out.println("To add relationships please choose the 'Add relationsips' option from the Menu!");
+                                System.out.println();
+                            }
+                        }
+
+                        // if there is more than one person (counter > 1)
+                    } else if (count > 1) {
+                        System.out.println("There were multiple persons found with this name, please enter " +
+                                "the date of birth for related person (DD/MM/YYYY): ");
+                        String personDOB = scanner.next();
+
+                        // finding the person by name, surname, birth date
+                        PreparedStatement prpStatement4 = connection.prepareStatement("SELECT * FROM persons WHERE name = ? AND surname = ? AND birth_date = ?");
+                        prpStatement4.setString(1, nameNewPerson);
+                        prpStatement4.setString(2, surnameNewPerson);
+                        prpStatement4.setString(3, personDOB);
+                        ResultSet rs4 = prpStatement4.executeQuery();
+
+                        // getting and printing person data for this person
+                        while (rs4.next()) {
+                            String name = rs4.getString("name");
+                            String surname = rs4.getString("surname");
+                            String gender = rs4.getString("gender");
+                            String birthDate = rs4.getString("birth_date");
+                            String deathDate = rs4.getString("death_date");
+                            existingPersonID = rs4.getInt("person_id");
+
+                            // upon confirmation set id to be related person
+                            System.out.println("Is this the person you wanted to add to the Family Tree?");
+                            System.out.println("--- " + name + " " + surname + " (" + gender + ") " + " (birth date: "
+                                    + birthDate + ", death date: " + deathDate + ")");
+                            System.out.println();
+                            System.out.println("Please choose between numbers: 1. Yes | 2. No");
+                            System.out.println("Enter the number: ");
+                            int input = scanner.nextInt();
+
+                            if (input == 1) {
+                                System.out.println("No further action required.");
+                                System.out.println("To add relationships please choose the 'Add relationsips' option from the Menu!");
+                                return;
+                            } else {
+                                System.out.print("Enter the gender (female/male/other): ");
+                                String genderNewPerson = scanner.next().toLowerCase(Locale.ROOT);
+                                System.out.print("Enter birth date DD/MM/YYYY: ");
+                                String birth_dateNewPerson = scanner.next();
+                                System.out.print("Enter death date DD/MM/YYYY (enter '-' if not applicable): ");
+                                String death_dateNewPerson = scanner.next();
+
+                                String query3 = "INSERT INTO persons (name, surname, gender, birth_date, death_date) " +
+                                        "VALUES (?, ?, ?, ?, ?)";
+
+                                PreparedStatement preparedStatement3 = connection.prepareStatement(query3);
+                                preparedStatement3.setString(1, nameNewPerson);
+                                preparedStatement3.setString(2, surnameNewPerson);
+                                preparedStatement3.setString(3, genderNewPerson);
+                                preparedStatement3.setString(4, birth_dateNewPerson);
+                                preparedStatement3.setString(5, death_dateNewPerson);
+
+                                preparedStatement3.execute();
+
+                                // finding the newly added person in database by name and surname
+                                PreparedStatement prpStatementNewPersonCheck2 = connection.prepareStatement("SELECT * FROM persons " +
+                                        "WHERE name = ? AND surname = ?");
+                                prpStatementNewPersonCheck2.setString(1, nameNewPerson);
+                                prpStatementNewPersonCheck2.setString(2, surnameNewPerson);
+
+                                ResultSet rs3 = prpStatementNewPersonCheck2.executeQuery();
+
+                                // getting new persons id
+                                while (rs3.next()) {
+                                    idNewPerson = rs3.getInt("person_id");
+                                }
+
+                                // confirming that the person has been added
+                                if (idNewPerson != 0) {
+                                    System.out.println(nameNewPerson + " " + surnameNewPerson + " has been added to the Family Tree.");
+                                    System.out.println("To add relationships please choose the 'Add relationsips' option from the Menu!");
+                                    System.out.println();
+                                }
+                            }
+                        }
+                    }
                 }
-            } else {
-                System.out.println("There already is such a person");
             }
-
-            System.out.println("Now you will have to input information about one of  the following: 1. Mother " +
-                    "2. Father 3. Spouse");
-            int relationship = scanner.nextInt();
-
-            switch (relationship) {
-                case 1: //mother
-                    RelationshipEdge mother = new RelationshipEdge(RelationshipLabels.mother);
-
-
-                    System.out.println("Please write name of mother: ");
-                    String motherName = scanner.next();
-                    System.out.println("Please write surname of mother: ");
-                    String motherSurname = scanner.next();
-
-
-                    break;
-
-                case 2: //father
-                    RelationshipEdge father = new RelationshipEdge(RelationshipLabels.father);
-                    break;
-
-                case 3:
-                    RelationshipEdge spouse = new RelationshipEdge(RelationshipLabels.spouses);
-                    break;
-
-                default:
-                    System.out.println("Invalid choice");
-            }
-
-            System.out.println();
-
-
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
         }
     }
 
-    public static void peopleBornInSameMonth(Graph<Person, RelationshipEdge> familyTree) throws ParseException {
+    public static void peopleBornInTheSameMonth(Graph<Person, RelationshipEdge> familyTree) throws ParseException {
         System.out.print("Type the month as a number (e.g. 1 = January, 2 = February, etc): ");
         Scanner sc = new Scanner(System.in);
         // get an input from the user as an integer
         int inputMonth = sc.nextInt();
+        // convert it to string so can apply regex for validation
         String inputMonthToString = String.valueOf(inputMonth);
-
+        // formatting method to convert string birth date to date data type
         DateFormat fromStringToDate = new SimpleDateFormat("dd/MM/yyyy");
 
         if (inputMonthToString != null && inputMonthToString.matches("^(1[0-2]|[1-9])$")) {
@@ -746,8 +888,310 @@ public class FamilyHeritageApplication {
             System.out.println("Invalid month number, the number must be between 1 and 12. Plese check input and try again!");
         }
     }
+
+    public static void createRelationship(String namePerson1, String surnamePerson1, String namePerson2, String surnamePerson2, int idPerson1, int idPerson2) {
+
+        try {
+            String databasePath = "jdbc:sqlite:family_heritage.db";
+            Connection connection = DriverManager.getConnection(databasePath);
+
+            if (connection != null) {
+                DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+                //System.out.println("Connected to database");
+                Statement statement = connection.createStatement();
+
+                Scanner scanner = new Scanner(System.in);
+
+                System.out.println(namePerson1 + " " + surnamePerson1 + " is <choose the correct relationship from the options below> of " + namePerson2 + " " + surnamePerson2 + ".");
+                System.out.println("1. Mother | 2. Father | 3. Spouse | 4. Daughter | 5. Son");
+                System.out.print("Enter the number: ");
+                int relationshipNumber = scanner.nextInt();
+
+                switch (relationshipNumber) {
+                    case 1: //mother
+                        RelationshipLabels relationshipLabelMother = RelationshipLabels.mother;
+
+                        String queryMother = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+
+                        PreparedStatement prpStatementMother = connection.prepareStatement(queryMother);
+                        prpStatementMother.setString(1, String.valueOf(relationshipLabelMother));
+                        prpStatementMother.setInt(2, idPerson1);
+                        prpStatementMother.setInt(3, idPerson2);
+
+                        prpStatementMother.executeUpdate();
+                        prpStatementMother.close();
+                        connection.close();
+                        break;
+
+                    case 2: //father
+                        String relationshipLabelFather = "father";
+
+                        String queryFather = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+
+                        PreparedStatement prpStatementFather = connection.prepareStatement(queryFather);
+                        prpStatementFather.setString(1, relationshipLabelFather);
+                        prpStatementFather.setInt(2, idPerson1);
+                        prpStatementFather.setInt(3, idPerson2);
+
+                        prpStatementFather.executeUpdate();
+                        prpStatementFather.close();
+                        connection.close();
+
+                        break;
+
+                    case 3: // spouse
+                        String relationshipLabelSpouse = "spouse";
+
+                        String querySpouse = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+
+                        PreparedStatement prpStatementSpouse = connection.prepareStatement(querySpouse);
+                        prpStatementSpouse.setString(1, relationshipLabelSpouse);
+                        prpStatementSpouse.setInt(2, idPerson1);
+                        prpStatementSpouse.setInt(3, idPerson2);
+
+                        prpStatementSpouse.executeUpdate();
+                        prpStatementSpouse.close();
+                        connection.close();
+                        break;
+
+                    case 4:
+                        String relationshipLabelDaughter = "daughter";
+
+                        String queryDaughter = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+
+                        PreparedStatement prpStatementDaughter = connection.prepareStatement(queryDaughter);
+                        prpStatementDaughter.setString(1, relationshipLabelDaughter);
+                        prpStatementDaughter.setInt(2, idPerson1);
+                        prpStatementDaughter.setInt(3, idPerson2);
+
+                        prpStatementDaughter.executeUpdate();
+                        prpStatementDaughter.close();
+                        connection.close();
+                        break;
+
+                    case 5:
+                        String relationshipLabelSon = "son";
+
+                        String querySon = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+
+                        PreparedStatement prpStatementSon = connection.prepareStatement(querySon);
+                        prpStatementSon.setString(1, relationshipLabelSon);
+                        prpStatementSon.setInt(2, idPerson1);
+                        prpStatementSon.setInt(3, idPerson2);
+
+                        prpStatementSon.executeUpdate();
+                        prpStatementSon.close();
+                        connection.close();
+                        break;
+
+                    default:
+                        System.out.println("Invalid choice");
+                }
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    }
+
+    public static void addRelationships() {
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the first related person's name only: ");
+        String namePerson1 = scanner.nextLine();
+        System.out.print("Enter the first related person's surname: ");
+        String surnamePerson1 = scanner.nextLine();
+        int idPerson1 = 0;
+        int idPerson2 = 0;
+
+        try {
+            String databasePath = "jdbc:sqlite:family_heritage.db";
+            Connection connection = DriverManager.getConnection(databasePath);
+
+            if (connection != null) {
+                DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+                //System.out.println("Connected to database");
+                Statement statement = connection.createStatement();
+
+                // finding the person1 in database by name and surname
+                PreparedStatement prpStatement = connection.prepareStatement("SELECT * FROM persons " +
+                        "WHERE name = ? AND surname = ?");
+                prpStatement.setString(1, namePerson1);
+                prpStatement.setString(2, surnamePerson1);
+
+                ResultSet rs = prpStatement.executeQuery();
+
+                // getting persons1 information and printing it out
+                int count = 0;
+                while (rs.next()) {
+                    System.out.print("Person(s) found: ");
+                    int personId1 = rs.getInt("person_id");
+                    String name = rs.getString("name");
+                    String surname = rs.getString("surname");
+                    String gender = rs.getString("gender");
+                    String birthDate = rs.getString("birth_date");
+                    String deathDate = rs.getString("death_date");
+
+                    System.out.println("--- " + name + " " + surname + " (" + gender + ") " + " (birth date: "
+                            + birthDate + ", death date: " + deathDate + ")");
+                    System.out.println();
+                    count++;
+
+                    // if there is only one person (counter == 1)
+                    if (count == 1) {
+                        // upon confirmation set the id to be set as related person
+                        System.out.println("Is this the first person you want to add a relationship to?");
+                        System.out.println("Please choose between numbers 1. Yes | 2. No");
+                        System.out.print("Enter the number: ");
+                        int input = scanner.nextInt();
+
+                        if (input == 1) {
+                            idPerson1 = personId1;
+                            System.out.println("The first person has been selected.");
+                        } else {
+                            System.out.println("To add a person to the Family Tree please select option 'Add person' from the Menu");
+                            return;
+                        }
+
+                        // if there is more than one person (counter > 1)
+                    } else if (count > 1) {
+                        System.out.println("There were multiple persons found with this name, please enter " +
+                                "the date of birth for related person (DD/MM/YYYY): ");
+                        String person1DOB = scanner.next();
+
+                        // finding the person by name, surname, birth date
+                        PreparedStatement prpStatement4 = connection.prepareStatement("SELECT * FROM persons WHERE name = ? AND surname = ? AND birth_date = ?");
+                        prpStatement4.setString(1, namePerson1);
+                        prpStatement4.setString(2, surnamePerson1);
+                        prpStatement4.setString(3, person1DOB);
+                        ResultSet rs4 = prpStatement4.executeQuery();
+
+                        // getting and printing person data for this person
+                        while (rs4.next()) {
+                            String name1 = rs4.getString("name");
+                            String surname1 = rs4.getString("surname");
+                            String gender1 = rs4.getString("gender");
+                            String birthDate1 = rs4.getString("birth_date");
+                            String deathDate1 = rs4.getString("death_date");
+                            int personId11 = rs4.getInt("person_id");
+
+                            System.out.println("--- " + name1 + " " + surname1 + " (" + gender1 + ") " + " (birth date: "
+                                    + birthDate1 + ", death date: " + deathDate1 + ")");
+                            System.out.println();
+
+                            System.out.println("Is this the first person you want to add a relationship to?");
+                            System.out.println("Please choose between numbers: 1. Yes | 2. No");
+                            System.out.print("Enter the number: ");
+                            int input1 = scanner.nextInt();
+
+                            if (input1 == 1) {
+                                idPerson1 = personId11;
+                                System.out.println("The first person has been selected.");
+                            } else {
+                                System.out.println("To add a person to the Family Tree please select option 'Add person' from the Menu");
+                                return;
+                            }
+                        }
+                    }
+                }
+                System.out.println("Enter information about a person related to " + namePerson1 + " " + surnamePerson1);
+                System.out.print("Enter the second related person's name only: ");
+                String namePerson2 = scanner.nextLine();
+                System.out.print("Enter the second related person's surname: ");
+                String surnamePerson2 = scanner.nextLine();
+
+                // finding the person2 in database by name and surname
+                PreparedStatement prpStatement1 = connection.prepareStatement("SELECT * FROM persons " +
+                        "WHERE name = ? AND surname = ?");
+                prpStatement1.setString(1, namePerson2);
+                prpStatement1.setString(2, surnamePerson2);
+
+                ResultSet rs0 = prpStatement1.executeQuery();
+
+                // getting persons2 information and printing it out
+                int counter = 0;
+                while (rs0.next()) {
+                    System.out.print("Person(s) found: ");
+                    int personId2 = rs0.getInt("person_id");
+                    String name = rs0.getString("name");
+                    String surname = rs0.getString("surname");
+                    String gender = rs0.getString("gender");
+                    String birthDate = rs0.getString("birth_date");
+                    String deathDate = rs0.getString("death_date");
+
+                    System.out.println("--- " + name + " " + surname + " (" + gender + ") " + " (birth date: "
+                            + birthDate + ", death date: " + deathDate + ")");
+                    System.out.println();
+                    counter++;
+
+                    // if there is only one person (counter == 1)
+                    if (counter == 1) {
+                        // upon confirmation set the id to be set as related person
+                        System.out.println("Is this the second person you want to add a relationship to?");
+                        System.out.println("Please choose between numbers 1. Yes | 2. No");
+                        System.out.print("Enter the number: ");
+                        int input2 = scanner.nextInt();
+
+                        if (input2 == 1) {
+                            idPerson2 = personId2;
+                            System.out.println("The second person has been selected.");
+                        } else {
+                            System.out.println("To add a person to the Family Tree please select option 'Add person' from the Menu");
+                            return;
+                        }
+
+                        // if there is more than one person (counter > 1)
+                    } else if (counter > 1) {
+                        System.out.println("There were multiple persons found with this name, please enter " +
+                                "the date of birth for related person (DD/MM/YYYY): ");
+                        String person2DOB = scanner.next();
+
+                        // finding the person by name, surname, birth date
+                        PreparedStatement prpStatement5 = connection.prepareStatement("SELECT * FROM persons WHERE name = ? AND surname = ? AND birth_date = ?");
+                        prpStatement5.setString(1, namePerson2);
+                        prpStatement5.setString(2, surnamePerson2);
+                        prpStatement5.setString(3, person2DOB);
+                        ResultSet rs5 = prpStatement5.executeQuery();
+
+                        // getting and printing person data for this person
+                        while (rs5.next()) {
+                            String name2 = rs5.getString("name");
+                            String surname2 = rs5.getString("surname");
+                            String gender2 = rs5.getString("gender");
+                            String birthDate2 = rs5.getString("birth_date");
+                            String deathDate2 = rs5.getString("death_date");
+                            int personId22 = rs5.getInt("person_id");
+
+                            System.out.println("--- " + name2 + " " + surname2 + " (" + gender2 + ") " + " (birth date: "
+                                    + birthDate2 + ", death date: " + deathDate2 + ")");
+                            System.out.println();
+
+                            System.out.println("Is this the second person you want to add a relationship to?");
+                            System.out.println("Please choose between numbers: 1. Yes | 2. No");
+                            System.out.print("Enter the number: ");
+                            int input3 = scanner.nextInt();
+
+                            if (input3 == 1) {
+                                idPerson2 = personId22;
+                                System.out.println("The second person has been selected.");
+                            } else {
+                                System.out.println("To add a person to the Family Tree please select option 'Add person' from the Menu");
+                                return;
+                            }
+                        }
+                    }
+                }
+                // add the relationship between first person and second person
+                createRelationship(namePerson1, surnamePerson1, namePerson2, surnamePerson2, idPerson1, idPerson2);
+
+                System.out.println("Action aborted.");
+                System.out.println();
+            }
+
+
+        } catch (SQLException exception) {
+            System.out.println("There was an error: " + exception);
+        }
+
+    }
 }
-
-
-
 
