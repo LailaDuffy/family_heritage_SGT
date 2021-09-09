@@ -126,7 +126,8 @@ public class FamilyHeritageApplication {
                             switch (input) {
                                 case 1:
                                     System.out.println("Please input the new name of the person: ");
-                                    String newName = in.next();
+                                    String newName = in.nextLine();
+                                    in.nextLine();
 
                                     PreparedStatement prpStatement1 = connection.prepareStatement("UPDATE persons " +
                                             "SET name = ? WHERE name = ? AND surname = ?");
@@ -223,6 +224,8 @@ public class FamilyHeritageApplication {
                         if (connection != null) {
                             DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
 
+                            int personID = 0;
+                            int idToDelete = 0;
                             // finding the person in database by name and surname
                             PreparedStatement prpStatement = connection.prepareStatement("SELECT * FROM persons " +
                                     "WHERE name = ? AND surname = ?");
@@ -232,62 +235,91 @@ public class FamilyHeritageApplication {
 
                             // getting and printing person's information
                             int counter = 0;
+                            System.out.println("Person(s) found: ");
                             while (rs.next()) {
                                 String name = rs.getString("name");
                                 String surname = rs.getString("surname");
                                 String gender = rs.getString("gender");
                                 String birthDate = rs.getString("birth_date");
                                 String deathDate = rs.getString("death_date");
+                                personID = rs.getInt("person_id");
 
-                                System.out.println("Person found: ");
-                                System.out.println("*** " + name + " " + surname + " (" + gender + ") " + " (birth date: "
-                                        + birthDate + ", death date: " + deathDate + ")" + " ***");
-                                System.out.println();
+                                System.out.println("--- " + name + " " + surname + " (" + gender + ") " + " (birth date: "
+                                        + birthDate + ", death date: " + deathDate + ")");
 
                                 counter++;
                             }
 
-                            // if at least one person is found with given name and surname, asking the user to
-                            // confirm deletion
-                            if (counter > 0) {
+                            // if there is only one person (counter == 1)
+                            if (counter == 1) {
+                                // upon confirmation set the id to be deleted
                                 System.out.println("Is this the person you want to remove from the family tree?");
                                 System.out.println("Enter the number: ");
                                 System.out.println("1. Yes / 2. No");
                                 int input = in.nextInt();
 
                                 if (input == 1) {
-                                    // finding the persons id
-                                    PreparedStatement prpStatement1 = connection.prepareStatement("SELECT * FROM persons WHERE name = ? AND surname = ?");
-                                    prpStatement1.setString(1, nameToDelete);
-                                    prpStatement1.setString(2, surnameToDelete);
-                                    ResultSet rs1 = prpStatement1.executeQuery();
-
-                                    int idToDelete = 0;
-                                    while (rs1.next()) {
-                                        idToDelete = rs1.getInt("person_id");
-                                    }
-
-                                    // removing the person from persons table based on id
-                                    PreparedStatement prpStatement2 = connection.prepareStatement("DELETE FROM persons WHERE person_id = ?");
-                                    prpStatement2.setInt(1, idToDelete);
-                                    prpStatement2.execute();
-
-                                    // removing the person from relationships table based on id
-                                    PreparedStatement prpStatement3 = connection.prepareStatement("DELETE FROM relationships WHERE person_1_id = ? OR person_2_id = ?");
-                                    prpStatement3.setInt(1, idToDelete);
-                                    prpStatement3.setInt(2, idToDelete);
-                                    prpStatement3.execute();
-
+                                    idToDelete = personID;
                                 } else {
                                     System.out.println("This person won't be removed");
+                                }
+
+                                // if there is more than one person (counter > 1)
+                            } else if (counter > 1) {
+                                System.out.println("There were multiple persons found with this name, please enter " +
+                                        "the date of birth for person you wish to delete (DD/MM/YYYY): ");
+                                String dateToDelete = in.next();
+
+                                // finding the person bu name, surname, birth date
+                                PreparedStatement prpStatement4 = connection.prepareStatement("SELECT * FROM persons WHERE name = ? AND surname = ? AND birth_date = ?");
+                                prpStatement4.setString(1, nameToDelete);
+                                prpStatement4.setString(2, surnameToDelete);
+                                prpStatement4.setString(3, dateToDelete);
+                                ResultSet rs2 = prpStatement4.executeQuery();
+
+                                // getting and printing person data for this person
+                                while (rs2.next()) {
+                                    String name = rs2.getString("name");
+                                    String surname = rs2.getString("surname");
+                                    String gender = rs2.getString("gender");
+                                    String birthDate = rs2.getString("birth_date");
+                                    String deathDate = rs2.getString("death_date");
+                                    personID = rs2.getInt("person_id");
+
+                                    // upon confirmation set id to be deleted
+                                    System.out.println("Is this the person you wish to remove from the family tree?");
+                                    System.out.println("--- " + name + " " + surname + " (" + gender + ") " + " (birth date: "
+                                            + birthDate + ", death date: " + deathDate + ")" );
+                                    System.out.println();
+                                    System.out.println("Enter the number: ");
+                                    System.out.println("1. Yes / 2. No");
+                                    int input = in.nextInt();
+
+                                    if (input == 1) {
+                                        idToDelete = personID;
+                                    } else {
+                                        System.out.println("This person won't be removed");
+                                    }
                                 }
 
                             } else {    // if counter still 0, person was not found
                                 System.out.println("This person was not found in the family tree");
                             }
 
+                            // removing the person from persons table based on id
+                            PreparedStatement prpStatement2 = connection.prepareStatement("DELETE FROM persons WHERE person_id = ?");
+                            prpStatement2.setInt(1, idToDelete);
+                            prpStatement2.execute();
 
+                            // removing the person from relationships table based on id
+                            PreparedStatement prpStatement3 = connection.prepareStatement("DELETE FROM relationships WHERE person_1_id = ? OR person_2_id = ?");
+                            prpStatement3.setInt(1, idToDelete);
+                            prpStatement3.setInt(2, idToDelete);
+                            prpStatement3.execute();
+
+                            System.out.println("Person removed");
                         }
+
                     } catch (SQLException exception) {
                         System.out.println("Error: " + exception);
                     }
