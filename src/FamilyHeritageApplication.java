@@ -112,100 +112,100 @@ public class FamilyHeritageApplication {
                             prpStatement.setString(2, personToUpdateSurname);
                             ResultSet rs = prpStatement.executeQuery();
 
+                            if (rs.next() == false) {
+                                System.out.println("No such person");
+                            } else {
 
-                            while (rs.next()) {
-                                String name = rs.getString("name");
-                                String surname = rs.getString("surname");
-                                String gender = rs.getString("gender");
-                                String birthDate = rs.getString("birth_date");
-                                String deathDate = rs.getString("death_date");
+                                while (rs.next()) {
+                                    String name = rs.getString("name");
+                                    String surname = rs.getString("surname");
+                                    String gender = rs.getString("gender");
+                                    String birthDate = rs.getString("birth_date");
+                                    String deathDate = rs.getString("death_date");
 
-                                System.out.println(name + " " + surname + " (" + gender + ") " + " (birth date: "
-                                        + birthDate + ", death date: " + deathDate + ")");
+                                    System.out.println(name + " " + surname + " (" + gender + ") " + " (birth date: "
+                                            + birthDate + ", death date: " + deathDate + ")");
+                                }
+
+                                System.out.println("Which part of information do you want to update: ");
+                                System.out.println("1. Name   2. Surname   3. Gender   4. Birth date   5. Death date");
+                                System.out.println("Please input the corresponding number: ");
+                                int input = in.nextInt();
+                                in.nextLine();
+
+                                switch (input) {
+                                    case 1:
+                                        System.out.println("Please input the new name of the person: ");
+                                        String newName = in.nextLine();
+
+                                        PreparedStatement prpStatement1 = connection.prepareStatement("UPDATE persons " +
+                                                "SET name = ? WHERE name = ? AND surname = ?");
+                                        prpStatement1.setString(1, newName);
+                                        prpStatement1.setString(2, personToUpdateName);
+                                        prpStatement1.setString(3, personToUpdateSurname);
+                                        prpStatement1.execute();
+
+                                        break;
+
+                                    case 2:
+                                        System.out.println("Please input the new surname of the person: ");
+                                        String newSurname = in.nextLine();
+
+                                        PreparedStatement prpStatement2 = connection.prepareStatement("UPDATE persons " +
+                                                "SET surname = ? WHERE name = ? AND surname = ?");
+                                        prpStatement2.setString(1, newSurname);
+                                        prpStatement2.setString(2, personToUpdateName);
+                                        prpStatement2.setString(3, personToUpdateSurname);
+                                        prpStatement2.execute();
+
+                                        break;
+
+                                    case 3:
+                                        System.out.println("Please input the new gender of the person: ");
+                                        String newGender = in.nextLine();
+
+                                        PreparedStatement prpStatement3 = connection.prepareStatement("UPDATE persons " +
+                                                "SET gender = ? WHERE name = ? AND surname = ?");
+                                        prpStatement3.setString(1, newGender);
+                                        prpStatement3.setString(2, personToUpdateName);
+                                        prpStatement3.setString(3, personToUpdateSurname);
+                                        prpStatement3.execute();
+
+                                        break;
+
+                                    case 4:
+                                        System.out.println("Please input the new birth date of the person DD/MM/YYYY: ");
+                                        String newBirthDate = in.nextLine();
+
+                                        PreparedStatement prpStatement4 = connection.prepareStatement("UPDATE persons " +
+                                                "SET birth_date = ? WHERE name = ? AND surname = ?");
+                                        prpStatement4.setString(1, newBirthDate);
+                                        prpStatement4.setString(2, personToUpdateName);
+                                        prpStatement4.setString(3, personToUpdateSurname);
+                                        prpStatement4.execute();
+
+                                        break;
+
+                                    case 5:
+                                        System.out.println("Please input the death date of the person DD/MM/YYYY: ");
+                                        String newDeathDate = in.nextLine();
+
+                                        PreparedStatement prpStatement5 = connection.prepareStatement("UPDATE persons " +
+                                                "SET death_date = ? WHERE name = ? AND surname = ?");
+                                        prpStatement5.setString(1, newDeathDate);
+                                        prpStatement5.setString(2, personToUpdateName);
+                                        prpStatement5.setString(3, personToUpdateSurname);
+                                        prpStatement5.execute();
+
+                                        break;
+
+                                    default:
+                                        System.out.println("Invalid number. Please type a number between 1-5");
+
+                                }
                             }
-
-                            System.out.println("Which part of information do you want to update: ");
-                            System.out.println("1. Name   2. Surname   3. Gender   4. Birth date   5. Death date");
-                            System.out.println("Please input the corresponding number: ");
-                            int input = in.nextInt();
-
-                            switch (input) {
-                                case 1:
-                                    System.out.println("Please input the new name of the person: ");
-                                    String newName = in.nextLine();
-                                    in.nextLine();
-
-                                    PreparedStatement prpStatement1 = connection.prepareStatement("UPDATE persons " +
-                                            "SET name = ? WHERE name = ? AND surname = ?");
-                                    prpStatement1.setString(1, newName);
-                                    prpStatement1.setString(2, personToUpdateName);
-                                    prpStatement1.setString(3, personToUpdateSurname);
-                                    prpStatement1.execute();
-
-                                    break;
-
-                                case 2:
-                                    System.out.println("Please input the new surname of the person: ");
-                                    String newSurname = in.nextLine();
-                                    in.nextLine();
-
-                                    PreparedStatement prpStatement2 = connection.prepareStatement("UPDATE persons " +
-                                            "SET name = ? WHERE name = ? AND surname = ?");
-                                    prpStatement2.setString(1, newSurname);
-                                    prpStatement2.setString(2, personToUpdateName);
-                                    prpStatement2.setString(3, personToUpdateSurname);
-                                    prpStatement2.execute();
-
-                                    break;
-
-                                case 3:
-                                    System.out.println("Please input the new gender of the person: ");
-                                    String newGender = in.nextLine();
-                                    in.nextLine();
-
-                                    PreparedStatement prpStatement3 = connection.prepareStatement("UPDATE persons " +
-                                            "SET name = ? WHERE name = ? AND surname = ?");
-                                    prpStatement3.setString(1, newGender);
-                                    prpStatement3.setString(2, personToUpdateName);
-                                    prpStatement3.setString(3, personToUpdateSurname);
-                                    prpStatement3.execute();
-
-                                    break;
-
-                                case 4:
-                                    System.out.println("Please input the new birth date of the person DD/MM/YYYY: ");
-                                    String newBirthDate = in.nextLine();
-                                    in.nextLine();
-
-                                    PreparedStatement prpStatement4 = connection.prepareStatement("UPDATE persons " +
-                                            "SET name = ? WHERE name = ? AND surname = ?");
-                                    prpStatement4.setString(1, newBirthDate);
-                                    prpStatement4.setString(2, personToUpdateName);
-                                    prpStatement4.setString(3, personToUpdateSurname);
-                                    prpStatement4.execute();
-
-                                    break;
-
-                                case 5:
-                                    System.out.println("Please input the death date of the person DD/MM/YYYY: ");
-                                    String newDeathDate = in.nextLine();
-                                    in.nextLine();
-
-                                    PreparedStatement prpStatement5 = connection.prepareStatement("UPDATE persons " +
-                                            "SET name = ? WHERE name = ? AND surname = ?");
-                                    prpStatement5.setString(1, newDeathDate);
-                                    prpStatement5.setString(2, personToUpdateName);
-                                    prpStatement5.setString(3, personToUpdateSurname);
-                                    prpStatement5.execute();
-
-                                    break;
-
-                                default:
-                                    System.out.println("Invalid number. Please type a number between 1-5");
-
-                            }
-
                         }
+
                     } catch (SQLException exception) {
                         System.out.println("Error: " + exception);
                     }
