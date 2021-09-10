@@ -84,7 +84,7 @@ public class FamilyHeritageApplication {
 
                 case 5:
                     // Add a person to the Family Tree
-                    addPerson();
+                    addPerson(familyTree);
                     System.out.println();
                     break;
 
@@ -351,7 +351,7 @@ public class FamilyHeritageApplication {
         return graph;
     }
 
-    public static void DBConnection(Graph<Person, RelationshipEdge> familyTree) {
+    public static Graph<Person, RelationshipEdge> DBConnection(Graph<Person, RelationshipEdge> familyTree) {
 
         try {
             String databasePath = "jdbc:sqlite:family_heritage.db";
@@ -441,11 +441,12 @@ public class FamilyHeritageApplication {
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
         }
-
+        return familyTree;
     }
 
     public static void showFamilyTreeMembersList(Graph<Person, RelationshipEdge> familyTree) {
-        DBConnection(familyTree);
+
+        familyTree = DBConnection(familyTree);
         System.out.println("Here is a list of every person in the Family Tree: ");
         for (Person eachPerson : familyTree.vertexSet()) {
             System.out.println(eachPerson.getName() + " " + eachPerson.getSurname() + " (born in " + eachPerson.getBirthDate() + ")");
@@ -454,7 +455,9 @@ public class FamilyHeritageApplication {
     }
 
     public static void printInfoAboutPerson(Graph<Person, RelationshipEdge> familyTree) {
-        DBConnection(familyTree);
+
+        familyTree = DBConnection(familyTree);
+
         System.out.print("Type in a name of person: ");
         Scanner scan = new Scanner(System.in);
         String inputChoice = scan.nextLine();
@@ -628,7 +631,7 @@ public class FamilyHeritageApplication {
 
     }
 
-    public static void addPerson() {
+    public static void addPerson(Graph<Person, RelationshipEdge> familyTree) {
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the new person's name only: ");
@@ -855,9 +858,14 @@ public class FamilyHeritageApplication {
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
         }
+
+        DBConnection(familyTree);
     }
 
     public static void peopleBornInTheSameMonth(Graph<Person, RelationshipEdge> familyTree) throws ParseException {
+
+        familyTree = DBConnection(familyTree);
+
         System.out.print("Type the month as a number (e.g. 1 = January, 2 = February, etc): ");
         Scanner sc = new Scanner(System.in);
         // get an input from the user as an integer
@@ -903,7 +911,7 @@ public class FamilyHeritageApplication {
                 Scanner scanner = new Scanner(System.in);
 
                 System.out.println(namePerson1 + " " + surnamePerson1 + " is <choose the correct relationship from the options below> of " + namePerson2 + " " + surnamePerson2 + ".");
-                System.out.println("1. Mother | 2. Father | 3. Spouse | 4. Daughter | 5. Son");
+                System.out.println("1. Mother | 2. Father | 3. Spouse | 4. Daughter | 5. Son | 6. Divorced");
                 System.out.print("Enter the number: ");
                 int relationshipNumber = scanner.nextInt();
 
@@ -911,77 +919,88 @@ public class FamilyHeritageApplication {
                     case 1: //mother
                         RelationshipLabels relationshipLabelMother = RelationshipLabels.mother;
 
-                        String queryMother = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+                        String queryMother = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id = ?";
 
                         PreparedStatement prpStatementMother = connection.prepareStatement(queryMother);
                         prpStatementMother.setString(1, String.valueOf(relationshipLabelMother));
                         prpStatementMother.setInt(2, idPerson1);
                         prpStatementMother.setInt(3, idPerson2);
 
-                        prpStatementMother.executeUpdate();
-                        prpStatementMother.close();
-                        connection.close();
+                        prpStatementMother.execute();
+
                         break;
 
                     case 2: //father
-                        String relationshipLabelFather = "father";
+                        RelationshipLabels relationshipLabelFather = RelationshipLabels.father;
 
-                        String queryFather = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+                        String queryFather = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id = ?";
 
                         PreparedStatement prpStatementFather = connection.prepareStatement(queryFather);
-                        prpStatementFather.setString(1, relationshipLabelFather);
+                        prpStatementFather.setString(1, String.valueOf(relationshipLabelFather));
                         prpStatementFather.setInt(2, idPerson1);
                         prpStatementFather.setInt(3, idPerson2);
 
-                        prpStatementFather.executeUpdate();
-                        prpStatementFather.close();
-                        connection.close();
+                        prpStatementFather.execute();
+
 
                         break;
 
                     case 3: // spouse
-                        String relationshipLabelSpouse = "spouse";
+                        RelationshipLabels relationshipLabelSpouse = RelationshipLabels.spouses;
 
-                        String querySpouse = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+                        String querySpouse = "INSERT INTO relationships (person_1_id, person_2_id, relationship_type, person_1, person_2) VALUES (?, ?, ?, ?, ?)"; // query that works with SQLite only
 
                         PreparedStatement prpStatementSpouse = connection.prepareStatement(querySpouse);
-                        prpStatementSpouse.setString(1, relationshipLabelSpouse);
-                        prpStatementSpouse.setInt(2, idPerson1);
-                        prpStatementSpouse.setInt(3, idPerson2);
+                        prpStatementSpouse.setInt(1, idPerson1);
+                        prpStatementSpouse.setInt(2, idPerson2);
+                        prpStatementSpouse.setString(3, String.valueOf(relationshipLabelSpouse));
+                        prpStatementSpouse.setString(4, "");
+                        prpStatementSpouse.setString(5, "");
 
-                        prpStatementSpouse.executeUpdate();
-                        prpStatementSpouse.close();
-                        connection.close();
+                        prpStatementSpouse.execute();
+
                         break;
 
                     case 4:
-                        String relationshipLabelDaughter = "daughter";
+                        RelationshipLabels relationshipLabelDaughter = RelationshipLabels.daughter;
 
-                        String queryDaughter = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+                        String queryDaughter = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id = ?";
 
                         PreparedStatement prpStatementDaughter = connection.prepareStatement(queryDaughter);
-                        prpStatementDaughter.setString(1, relationshipLabelDaughter);
+                        prpStatementDaughter.setString(1, String.valueOf(relationshipLabelDaughter));
                         prpStatementDaughter.setInt(2, idPerson1);
                         prpStatementDaughter.setInt(3, idPerson2);
 
-                        prpStatementDaughter.executeUpdate();
-                        prpStatementDaughter.close();
-                        connection.close();
+                        prpStatementDaughter.execute();
+
                         break;
 
                     case 5:
-                        String relationshipLabelSon = "son";
+                        RelationshipLabels relationshipLabelSon = RelationshipLabels.son;
 
-                        String querySon = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id";
+                        String querySon = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id = ?";
 
                         PreparedStatement prpStatementSon = connection.prepareStatement(querySon);
-                        prpStatementSon.setString(1, relationshipLabelSon);
+                        prpStatementSon.setString(1, String.valueOf(relationshipLabelSon));
                         prpStatementSon.setInt(2, idPerson1);
                         prpStatementSon.setInt(3, idPerson2);
 
-                        prpStatementSon.executeUpdate();
-                        prpStatementSon.close();
-                        connection.close();
+                        prpStatementSon.execute();
+
+                        break;
+
+                    case 6: //divorced
+                        RelationshipLabels relationshipLabelDivorced = RelationshipLabels.divorced;
+
+                        String queryDivorced = "UPDATE relationships SET relationship_type = ? WHERE person_1_id = ? AND person_2_id = ?";
+
+                        PreparedStatement prpStatementDivorced = connection.prepareStatement(queryDivorced);
+                        prpStatementDivorced.setString(1, String.valueOf(relationshipLabelDivorced));
+                        prpStatementDivorced.setInt(2, idPerson1);
+                        prpStatementDivorced.setInt(3, idPerson2);
+
+                        prpStatementDivorced.execute();
+
                         break;
 
                     default:
@@ -1043,6 +1062,7 @@ public class FamilyHeritageApplication {
                         System.out.println("Please choose between numbers 1. Yes | 2. No");
                         System.out.print("Enter the number: ");
                         int input = scanner.nextInt();
+                        scanner.nextLine();
 
                         if (input == 1) {
                             idPerson1 = personId1;
@@ -1082,6 +1102,7 @@ public class FamilyHeritageApplication {
                             System.out.println("Please choose between numbers: 1. Yes | 2. No");
                             System.out.print("Enter the number: ");
                             int input1 = scanner.nextInt();
+                            scanner.nextLine();
 
                             if (input1 == 1) {
                                 idPerson1 = personId11;
@@ -1096,8 +1117,10 @@ public class FamilyHeritageApplication {
                 System.out.println("Enter information about a person related to " + namePerson1 + " " + surnamePerson1);
                 System.out.print("Enter the second related person's name only: ");
                 String namePerson2 = scanner.nextLine();
+
                 System.out.print("Enter the second related person's surname: ");
                 String surnamePerson2 = scanner.nextLine();
+
 
                 // finding the person2 in database by name and surname
                 PreparedStatement prpStatement1 = connection.prepareStatement("SELECT * FROM persons " +
@@ -1130,6 +1153,7 @@ public class FamilyHeritageApplication {
                         System.out.println("Please choose between numbers 1. Yes | 2. No");
                         System.out.print("Enter the number: ");
                         int input2 = scanner.nextInt();
+                        scanner.nextLine();
 
                         if (input2 == 1) {
                             idPerson2 = personId2;
@@ -1169,6 +1193,7 @@ public class FamilyHeritageApplication {
                             System.out.println("Please choose between numbers: 1. Yes | 2. No");
                             System.out.print("Enter the number: ");
                             int input3 = scanner.nextInt();
+                            scanner.nextLine();
 
                             if (input3 == 1) {
                                 idPerson2 = personId22;
@@ -1187,11 +1212,9 @@ public class FamilyHeritageApplication {
                 System.out.println();
             }
 
-
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
         }
-
     }
 }
 
