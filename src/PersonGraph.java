@@ -1,3 +1,4 @@
+import org.jgrapht.Graph;
 import org.jgrapht.graph.*;
 import java.util.*;
 
@@ -13,14 +14,6 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
     public PersonGraph(Class<? extends RelationshipEdge> edgeClass) {
         super(edgeClass);
     }
-
-
-    void removePerson(String name, String surname) {
-        Person person = new Person(name, surname);
-        relatedPersons.values().stream().forEach(e -> e.remove(person));
-        relatedPersons.remove(new Person(name, surname));
-    }
-
 
     void addRelationshipEdge(String name1, String surname1, String name2, String surname2, RelationshipLabels label1) { //does this really add an edge? how?
         Person person1 = new Person(name1, surname1);
@@ -88,4 +81,23 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
     public boolean addVertex(Person person) {
         return super.addVertex(person);
     }
+
+    public static void showFamilyTreeMembersList(Graph<Person, RelationshipEdge> DBConnection, Graph<Person, RelationshipEdge> familyTree) {
+
+        familyTree = Database.DBConnection(familyTree);
+        System.out.println("Here is a list of every person in the Family Tree: ");
+        for (Person eachPerson : familyTree.vertexSet()) {
+            System.out.println(eachPerson.getName() + " " + eachPerson.getSurname() + " (born in " + eachPerson.getBirthDate() + ")");
+        }
+        System.out.println();
+    }
+
+    public static Graph familyTree() {
+
+        PersonGraph graph = new PersonGraph(RelationshipEdge.class);
+
+        return graph;
+    }
+
+
 }
