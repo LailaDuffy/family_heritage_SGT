@@ -64,13 +64,13 @@ public class FamilyHeritageApplication {
             switch (choice) {
                 case 1:
                     // List of persons
-                    PersonGraph.showFamilyTreeMembersList(Database.DBConnection(familyTree), familyTree);
+                    PersonGraph.showFamilyTreeMembersList(familyTree);
                     System.out.println();
                     break;
 
                 case 2:
                     // Info about a person (name from user input)
-                    Person.printInfoAboutPerson(Database.DBConnection(familyTree), familyTree);
+                    Person.printInfoAboutPerson(familyTree);
                     System.out.println();
                     break;
 
@@ -88,31 +88,31 @@ public class FamilyHeritageApplication {
 
                 case 5:
                     // Find out birthdays based on month
-                    Person.peopleBornInTheSameMonth(Database.DBConnection(familyTree), familyTree);
+                    Person.peopleBornInTheSameMonth(familyTree);
                     System.out.println();
                     break;
 
                 case 6:
                     // Add a person to the Family Tree
-                    Person.addPerson(Database.DBConnection(familyTree), familyTree);
+                    Person.addPerson(familyTree);
                     System.out.println();
                     break;
 
                 case 7:
                     // Add relationships to persons in the Family Tree
-                    Person.addRelationships();
+                    Person.addRelationships(familyTree);
                     System.out.println();
                     break;
 
                 case 8:
                     // Update a person in the Family Tree
-                    Person.updatePerson(Database.DBConnection(familyTree), in, familyTree);
+                    Person.updatePerson(in, familyTree);
                     System.out.println();
                     break;
 
                 case 9:
                     // Remove a person from the Family Tree
-                    Person.removePerson(Database.DBConnection(familyTree), in, familyTree);
+                    Person.removePerson(in, familyTree);
                     System.out.println();
                     break;
 

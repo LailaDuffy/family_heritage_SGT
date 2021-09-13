@@ -11,7 +11,7 @@ public class Database {
             Connection connection = DriverManager.getConnection(databasePath);
 
             if (connection != null) {
-                DatabaseMetaData metaData = (DatabaseMetaData) connection.getMetaData();
+                connection.getMetaData();
                 //System.out.println("Connected to database");
 
                 Statement statement = connection.createStatement();

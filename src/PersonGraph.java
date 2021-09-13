@@ -33,20 +33,20 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
             edgesPerson2.remove(person1);
     }
 
-    List<Person> getRelatedPersons(String name, String surname) {
-        return relatedPersons.get(new Person(name, surname));
+    List<Person> getRelatedPersons(Person person) {
+        return relatedPersons.get(new Person());
     }
 
     // explores family tree as deep as possible along each Person's branch before exploring family tree line at the same level
     Set<Person> depthFirstTraversal(PersonGraph graph, Person root) {
-        Set<Person> visited = new LinkedHashSet<Person>();
-        Stack<Person> stack = new Stack<Person>();
+        Set<Person> visited = new LinkedHashSet<>();
+        Stack<Person> stack = new Stack<>();
         stack.push(root);
         while (!stack.isEmpty()) {
             Person person = stack.pop();
             if (!visited.contains(person)) {
                 visited.add(person);
-                for (Person eachPerson : graph.getRelatedPersons(person.getName(), person.getSurname())) {
+                for (Person eachPerson : graph.getRelatedPersons(person)) {
                     stack.push(eachPerson); // need to check if eachPerson works by itself or needs a method added, e.g. eachPerson.getName()
                 }
             }
@@ -56,13 +56,13 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
 
     // finds all persons in the family tree at the same level before going deeper in the family tree graph
     Set<Person> breadthFirstTraversal(PersonGraph graph, Person root) {
-        Set<Person> visited = new LinkedHashSet<Person>();
-        Queue<Person> queue = new LinkedList<Person>();
+        Set<Person> visited = new LinkedHashSet<>();
+        Queue<Person> queue = new LinkedList<>();
         queue.add(root);
         visited.add(root);
         while (!queue.isEmpty()) {
             Person person = queue.poll();
-            for (Person eachPerson : graph.getRelatedPersons(person.getName(), person.getSurname())) {
+            for (Person eachPerson : graph.getRelatedPersons(person)){
                 if (!visited.contains(eachPerson.getName())) {
                     visited.add(eachPerson); // need to check if eachPerson works by itself or needs a method added, e.g. eachPerson.getName()
                     queue.add(eachPerson); // need to check if eachPerson works by itself or needs a method added, e.g. eachPerson.getName()
@@ -82,14 +82,13 @@ public class PersonGraph extends DefaultDirectedGraph<Person, RelationshipEdge> 
         return super.addVertex(person);
     }
 
-    public static void showFamilyTreeMembersList(Graph<Person, RelationshipEdge> DBConnection, Graph<Person, RelationshipEdge> familyTree) {
+    public static void showFamilyTreeMembersList(Graph<Person, RelationshipEdge> familyTree) {
 
         familyTree = Database.DBConnection(familyTree);
         System.out.println("Here is a list of every person in the Family Tree: ");
         for (Person eachPerson : familyTree.vertexSet()) {
-            System.out.println(eachPerson.getName() + " " + eachPerson.getSurname() + " (born in " + eachPerson.getBirthDate() + ")");
+            System.out.println(eachPerson.getName() + " " + eachPerson.getSurname());
         }
-        System.out.println();
     }
 
     public static Graph familyTree() {
