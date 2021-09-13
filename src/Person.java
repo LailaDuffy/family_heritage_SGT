@@ -217,6 +217,8 @@ public class Person {
                     }
                 }
                 System.out.println("The person who has lived the longest is " + nameOldest + " " + surnameOldest + ": " + oldest + " years (born in " + birthDateOldest + ")");
+                rs.close();
+                statement.close();
             }
 
         } catch (SQLException exception) {
@@ -291,6 +293,8 @@ public class Person {
                     }
                 }
                 System.out.println("The youngest person is " + nameYoungest + " " + surnameYoungest + ": " + youngest + " year(s) old (born in " + birthDateYoungest + ")");
+                rs.close();
+                statement.close();
             }
         } catch (SQLException exception) {
             System.out.println("There was an error: " + exception);
@@ -1099,7 +1103,7 @@ public class Person {
                             prpStatement1.setString(2, personToUpdateName);
                             prpStatement1.setString(3, personToUpdateSurname);
                             prpStatement1.execute();
-
+                            prpStatement1.close();
                             break;
 
                         case 2:
@@ -1112,7 +1116,7 @@ public class Person {
                             prpStatement2.setString(2, personToUpdateName);
                             prpStatement2.setString(3, personToUpdateSurname);
                             prpStatement2.execute();
-
+                            prpStatement2.close();
                             break;
 
                         case 3:
@@ -1125,7 +1129,7 @@ public class Person {
                             prpStatement3.setString(2, personToUpdateName);
                             prpStatement3.setString(3, personToUpdateSurname);
                             prpStatement3.execute();
-
+                            prpStatement3.close();
                             break;
 
                         case 4:
@@ -1138,7 +1142,7 @@ public class Person {
                             prpStatement4.setString(2, personToUpdateName);
                             prpStatement4.setString(3, personToUpdateSurname);
                             prpStatement4.execute();
-
+                            prpStatement4.close();
                             break;
 
                         case 5:
@@ -1151,7 +1155,7 @@ public class Person {
                             prpStatement5.setString(2, personToUpdateName);
                             prpStatement5.setString(3, personToUpdateSurname);
                             prpStatement5.execute();
-
+                            prpStatement5.close();
                             break;
 
                         default:
@@ -1162,7 +1166,6 @@ public class Person {
         } catch (SQLException exception) {
             System.out.println("Error: " + exception);
         }
-        Database.DBConnection(familyTree);
     }
 
     public static void removePerson(Scanner in, Graph<Person, RelationshipEdge> familyTree) {
